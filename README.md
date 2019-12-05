@@ -2,4 +2,4 @@
 
 **UNI**ty **ANI**mation **O**rgamizer
 
-coming soon
+how to use it tutorials coming soon
