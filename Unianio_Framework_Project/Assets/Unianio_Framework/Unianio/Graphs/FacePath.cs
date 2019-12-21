@@ -1,5 +1,4 @@
-﻿//TODO:enable
-/*using System;
+﻿using System;
 using Unianio.Enums;
 using Unianio.Extensions;
 using Unianio.Genesis;
@@ -206,4 +205,4 @@ namespace Unianio.Graphs
         }
         
     }
-}*/
+}

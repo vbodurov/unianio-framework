@@ -19,11 +19,7 @@ namespace Unianio
                 factory
                     .Get<SceneHolder>()
                     .Initialize();
-
-            Messenger.Subscribe<CommandStartCoroutine>(this, OnCommandStartCoroutine);
         }
-        void OnCommandStartCoroutine(CommandStartCoroutine e) 
-            => StartCoroutine(e.Enumerator);
 
         void FixedUpdate()
         {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unianio.Rigged.IK;
 //TODO:enable
 //using Unianio.Rigged.IK;
 using Unianio.Services;
@@ -138,8 +139,7 @@ namespace Unianio.Extensions
         {
             return vector.IsBelowPlane(in targetPoint, in planeNormal);
         }
-        //TODO:enable
-        /*
+
 
         public static bool IsPointInFrontOf(in this Vector3 targetPoint, IBaseManipulator manipulator)
         {
@@ -148,7 +148,7 @@ namespace Unianio.Extensions
         public static bool IsPointAbove(in this Vector3 targetPoint, IBaseManipulator manipulator)
         {
             return point.IsAbovePlane(in targetPoint, manipulator.Manipulator.up, manipulator.Manipulator.position);
-        }*/
+        }
         public static bool IsPointInFrontOf(in this Vector3 targetPoint, Transform transform)
         {
             return point.IsAbovePlane(in targetPoint, transform.forward, transform.position);
@@ -202,8 +202,7 @@ namespace Unianio.Extensions
         {
             return obj.TransformPoint(localPoint);
         }
-        //TODO:enable
-/*
+
 
         public static Vector3 AsLocalDir(in this Vector3 worldDirection, IBaseManipulator bm)
         {
@@ -233,7 +232,7 @@ namespace Unianio.Extensions
         public static Vector3 AsOtherLocalPoint(in this Vector3 localPoint, IBaseManipulator fromLocal, IBaseManipulator toLocal)
         {
             return toLocal.Manipulator.InverseTransformPoint(fromLocal.Manipulator.TransformPoint(localPoint));
-        }*/
+        }
         public static Vector3 AsOtherLocalPoint(in this Vector3 localPoint, Transform fromLocal, Transform toLocal)
         {
             return toLocal.InverseTransformPoint(fromLocal.TransformPoint(localPoint));

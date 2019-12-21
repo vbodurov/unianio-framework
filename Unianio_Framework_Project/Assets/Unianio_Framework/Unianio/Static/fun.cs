@@ -9,11 +9,11 @@ using Unianio.Extensions;
 using Unianio.Graphs;
 using Unianio.Services;
 using UnityEngine;
-//using Unianio.Rigged;
-//using Unianio.Genesis;
-//using Unianio.Genesis.IK;
+using Unianio.Rigged;
+using Unianio.Genesis;
+using Unianio.Genesis.IK;
 using Unianio.Animations.Common;
-//using Unianio.IK;
+using Unianio.IK;
 using Unianio.RSG;
 
 namespace Unianio.Static
@@ -94,8 +94,7 @@ namespace Unianio.Static
         {
             return new Vector3(a.x + (b.x - a.x) * (float)tX, a.y + (b.y - a.y) * (float)tY, a.z + (b.z - a.z) * (float)tZ);
         }
-        //TODO:enable
-        /*
+
         public static FuncAni blinkAni(IComplexHuman human, double seconds, Func<double, double> func = null)
         {
             if (func == null) func = x => sin(x * PI);
@@ -112,7 +111,7 @@ namespace Unianio.Static
                     .AsUniqueNamed(unique.Blink + human.ID)
                 ;
         }
-        */
+        
         public static Quaternion lerp(in Quaternion a, in Quaternion b, double t)
         {
             if (t.IsEqual(0, 0.00001)) return a;
@@ -543,8 +542,6 @@ namespace Unianio.Static
             var x = ((Time.time - iniTime) / duration);
             return (float)func(x);
         }
-        //TODO:enable
-        /*
         public static void updateAndRetainHandRotationRelToElbow(HumArmChain chain)
         {
             var locFw = chain.Handle.forward.AsLocalDir(chain.Forearm);
@@ -560,7 +557,6 @@ namespace Unianio.Static
             updateAndRetainHandRotationRelToElbow(a);
             updateAndRetainHandRotationRelToElbow(b);
         }
-        */
         public static void update(IUpdatable a) { a.Update(); }
         public static void update(IUpdatable a, IUpdatable b) { a.Update(); b.Update(); }
         public static void update(IUpdatable a, IUpdatable b, IUpdatable c) { a.Update(); b.Update(); c.Update(); }
@@ -1383,8 +1379,6 @@ namespace Unianio.Static
             }
             return holder;
         }
-        //TODO:enable
-        /*
         public static Transform CreateHandle(
             Transform handleParent, HumanoidPart part, bool isHandleVisibled,
             Vector3 worldPosition, Vector3 worldForward, Vector3 worldUp)
@@ -1407,7 +1401,6 @@ namespace Unianio.Static
             handle.transform.LookAt(worldPosition + worldForward, worldUp);
             return handle.transform;
         }
-        */
         public static SkipFramesAni skipFramesThen(int frames, Action then)
         {
             var skipAni = get<SkipFramesAni>().Set(frames);
@@ -1518,8 +1511,6 @@ namespace Unianio.Static
             fire(new PlayAni { Ani = ani, QueueIndex = queueIndex });
             return ani;
         }
-        //TODO:enable
-        /*
         public static void hands<T>(IComplexHuman human, double seconds = 0.5) where T : IHandAni, IAnimation
         {
             play<T>().Set(human, BodySide.LT, seconds);
@@ -1544,7 +1535,6 @@ namespace Unianio.Static
             ((IAnimation)get<TLeft>().Set(human, BodySide.LT, seconds)).PlayOn(am);
             ((IAnimation)get<TRight>().Set(human, BodySide.RT, seconds)).PlayOn(am);
         }
-        */
         public static EndlessFuncAni playEndless(Action<EndlessFuncAni> update, int queueIndex = aniQueue.MainQueue)
         {
             var ani = get<EndlessFuncAni>().Set(update);

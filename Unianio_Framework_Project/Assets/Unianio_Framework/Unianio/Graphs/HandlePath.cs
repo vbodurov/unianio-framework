@@ -1,5 +1,4 @@
-﻿//TODO:enable
-/*using System;
+﻿using System;
 using Unianio.Enums;
 using Unianio.Extensions;
 using Unianio.IK;
@@ -550,110 +549,38 @@ namespace Unianio.Graphs
 
             return ModelPos(complex);
         }
-
         public HandlePath LocalPosCurveToTargetRelToMiddle(
             in Vector3 targetInLocal, in Vector3 control1RelToMiddle, 
             Func<double, double> function = null)
         {
-            var dist = distance.Between(_manipulator.LocalPos, targetInLocal);
             return LocalPos(vbp.Curve(_manipulator.LocalPos, 
-                    Vector3.Lerp(_manipulator.LocalPos, targetInLocal, 0.5f) + control1RelToMiddle * dist,
+                    Vector3.Lerp(_manipulator.LocalPos, targetInLocal, 0.5f) + control1RelToMiddle,
                 targetInLocal, function));
         }
         public HandlePath LocalPosCurveToTargetRelToMiddle(in Vector3 targetInLocal,
-            in Vector3 control1Dir, double relControl1Len,
-            Func<double, double> function = null)
-        {
-            return LocalPosCurveToTargetRelToMiddle(in targetInLocal,
-                in control1Dir, relControl1Len,
-                out var curve, function);
-        }
-        public HandlePath LocalPosCurveToTargetRelToMiddle(in Vector3 targetInLocal,
-            in Vector3 control1Dir, double relControl1Len,
-            in Vector3 control2Dir, double relControl2Len,
-            Func<double, double> function = null)
-        {
-            return LocalPosCurveToTargetRelToMiddle(in targetInLocal,
-                in control1Dir, relControl1Len,
-                in control2Dir, relControl2Len,
-                out var curve, function);
-        }
-        public HandlePath LocalPosCurveToTargetRelToMiddle(in Vector3 targetInLocal,
-            in Vector3 control1Dir, double relControl1Len,
+            in Vector3 control1Dir, 
             out QuadraticBezier curve,
             Func<double, double> function = null)
         {
-            var dist = distance.Between(_manipulator.LocalPos, targetInLocal);
             return LocalPos(curve = vbp.Curve(_manipulator.LocalPos,
-                lerp(_manipulator.LocalPos, in targetInLocal, 0.5f) + control1Dir * (float)(dist * relControl1Len),
-                targetInLocal, function));
-        }
-        public HandlePath LocalPosCurveToTargetRelToMiddle(in Vector3 targetInLocal,
-            in Vector3 control1Dir, double relControl1Len,
-            in Vector3 control2Dir, double relControl2Len,
-            out CubicBezier curve,
-            Func<double, double> function = null)
-        {
-            var dist = distance.Between(_manipulator.LocalPos, in targetInLocal);
-            return LocalPos(curve = vbp.Curve(_manipulator.LocalPos,
-                lerp(_manipulator.LocalPos, in targetInLocal, 0.3333f) + control1Dir * (float)(dist * relControl1Len),
-                lerp(_manipulator.LocalPos, in targetInLocal, 0.6666f) + control2Dir * (float)(dist * relControl2Len),
+                lerp(_manipulator.LocalPos, in targetInLocal, 0.5f) + control1Dir,
                 targetInLocal, function));
         }
         public HandlePath ModelPosCurveToTargetRelToMiddle(
             in Vector3 targetInModel, in Vector3 control1RelToMiddle, 
             Func<double, double> function = null)
         {
-            var dist = fun.distance.Between(_manipulator.ModelPos, targetInModel);
             return ModelPos(vbp.Curve(_manipulator.ModelPos, 
-                lerp(_manipulator.ModelPos, in targetInModel, 0.5f) + control1RelToMiddle * dist,
+                lerp(_manipulator.ModelPos, in targetInModel, 0.5f) + control1RelToMiddle,
                 targetInModel, function));
         }
         public HandlePath ModelPosCurveToTargetRelToMiddle(in Vector3 targetInModel,
-            in Vector3 control1Dir, double relControl1Len)
-        {
-            return ModelPosCurveToTargetRelToMiddle(in targetInModel,
-                in control1Dir, relControl1Len,
-                out var curve, null);
-        }
-        public HandlePath ModelPosCurveToTargetRelToMiddle(in Vector3 targetInModel,
-            in Vector3 control1Dir, double relControl1Len, 
-            Func<double, double> function)
-        {
-            return ModelPosCurveToTargetRelToMiddle(in targetInModel,
-                in control1Dir, relControl1Len,
-                out var curve, function);
-        }
-        public HandlePath ModelPosCurveToTargetRelToMiddle(in Vector3 targetInModel,
-            in Vector3 control1Dir, double relControl1Len,
-            in Vector3 control2Dir, double relControl2Len, 
-            Func<double, double> function = null)
-        {
-            return ModelPosCurveToTargetRelToMiddle(in targetInModel,
-                in control1Dir, relControl1Len,
-                in control2Dir, relControl2Len,
-                out var curve, function);
-        }
-        public HandlePath ModelPosCurveToTargetRelToMiddle(in Vector3 targetInModel,
-            in Vector3 control1Dir, double relControl1Len,
+            in Vector3 control1Vec, 
             out QuadraticBezier curve,
             Func<double, double> function = null)
         {
-            var dist = distance.Between(_manipulator.ModelPos, targetInModel);
             return ModelPos(curve = vbp.Curve(_manipulator.ModelPos,
-                lerp(_manipulator.ModelPos, in targetInModel, 0.5f) + control1Dir * (float)(dist * relControl1Len),
-                targetInModel, function));
-        }
-        public HandlePath ModelPosCurveToTargetRelToMiddle(in Vector3 targetInModel,
-            in Vector3 control1Dir, double relControl1Len,
-            in Vector3 control2Dir, double relControl2Len,
-            out CubicBezier curve,
-            Func<double, double> function = null)
-        {
-            var dist = distance.Between(_manipulator.ModelPos, in targetInModel);
-            return ModelPos(curve = vbp.Curve(_manipulator.ModelPos,
-                lerp(_manipulator.ModelPos, in targetInModel, 0.3333f) + control1Dir * (float)(dist * relControl1Len),
-                lerp(_manipulator.ModelPos, in targetInModel, 0.6666f) + control2Dir * (float)(dist * relControl2Len),
+                lerp(_manipulator.ModelPos, in targetInModel, 0.5f) + control1Vec,
                 targetInModel, function));
         }
         public HandlePath ModelRotToTargetBy(Vector3 fw, Vector3 approximateUp, Func<Quaternion> getModelRot, double maxDegreesPerFrame)
@@ -959,22 +886,20 @@ namespace Unianio.Graphs
 
             return WorldPos(complex);
         }
-        public HandlePath WorldPosCurveToTargetRelToEnd(in Vector3 targetInWorld, in Vector3 control1RelToEnd, Func<double, double> function = null)
+        public HandlePath WorldPosCurveToTargetRelToEnd(in Vector3 targetInWorld, in Vector3 control1Vec, Func<double, double> function = null)
         {
-            var dist = fun.distance.Between(_manipulator.Manipulator.position, targetInWorld);
-            return WorldPos(vbp.Curve(_manipulator.Manipulator.position, targetInWorld + control1RelToEnd * dist, targetInWorld, function));
+            return WorldPos(vbp.Curve(_manipulator.Manipulator.position, targetInWorld + control1Vec, targetInWorld, function));
         }
-        public HandlePath WorldPosCurveToTargetRelToMiddle(in Vector3 targetInWorld, in Vector3 control1RelToMiddle, Func<double, double> function = null)
+        public HandlePath WorldPosCurveToTargetRelToMiddle(in Vector3 targetInWorld, in Vector3 control1Vec, Func<double, double> function = null)
         {
-            var dist = fun.distance.Between(_manipulator.Manipulator.position, targetInWorld);
             return WorldPos(vbp.Curve(_manipulator.Manipulator.position, 
-                lerp(_manipulator.Manipulator.position, in targetInWorld, 0.5f) + control1RelToMiddle * dist,
+                lerp(_manipulator.Manipulator.position, in targetInWorld, 0.5f) + control1Vec,
                 targetInWorld, function));
         }
-        public HandlePath WorldPosCurveToTargetRelToMiddleAbsControl(in Vector3 posInWorld, in Vector3 control1RelToMiddle, Func<double, double> function = null)
+        public HandlePath WorldPosCurveToTargetRelToMiddleAbsControl(in Vector3 posInWorld, in Vector3 control1Vec, Func<double, double> function = null)
         {
             return WorldPos(vbp.Curve(_manipulator.Manipulator.position, 
-                lerp(_manipulator.Manipulator.position, in posInWorld, 0.5f) + control1RelToMiddle, 
+                lerp(_manipulator.Manipulator.position, in posInWorld, 0.5f) + control1Vec, 
                 posInWorld, function));
         }
         public HandlePath ModelRot(IQuaternionByProgress rotateInModelSpace)
@@ -1095,4 +1020,4 @@ namespace Unianio.Graphs
             return scaChange;
         }
     }
-}*/
+}

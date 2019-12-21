@@ -25,9 +25,11 @@ namespace Unianio.Animations
                     _fixedUpdateAnimations.AddAnimation(e.Ani);
             }, this);
 
+            if (UnianioConfig.UseAnimatedHumans) play<IHumanManager>(aniQueue.LateQueue);
 
             _rootService = get<IUnitySceneRootService>() ?? new VoidUnitySceneRootService();
             _rootService.Initialize();
+            
 
             return this;
         }

@@ -6,4 +6,6 @@
     {
         "Unianio", "Assembly-CSharp"/*, "CustomAssembly"*/
     };
+
+    public const bool UseAnimatedHumans = true;
 }

@@ -1,7 +1,13 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using Unianio.Animations;
 using Unianio.Enums;
+using Unianio.Genesis;
+using Unianio.IK;
+using Unianio.MakeHuman;
+using Unianio.PhysicsAgents;
+using Unianio.Rigged;
 //TODO:enable
 //using Unianio.Genesis;
 //using Unianio.IK;
@@ -39,8 +45,7 @@ namespace Unianio.Events
             Tracker3 = tracker3;
         }
     }
-    //TODO:enable
-    /*
+
     public class ComplexHumanEnabled : ComplexHumanInstanceEvent
     {
         public ComplexHumanEnabled(IComplexHuman human) : base(human) { }
@@ -50,7 +55,7 @@ namespace Unianio.Events
         public ComplexHumanDisabled(IComplexHuman human) : base(human) { }
     }
 
-        */
+
     public class BeforeCreatingPlayerHand : BaseEvent
     {
         public BodySide Side { get; }
@@ -143,13 +148,8 @@ namespace Unianio.Events
         public ulong Id { get; }
         public DeselectUiElement(ulong id) => Id = id;
     }
-    public class CommandStartCoroutine : BaseEvent
-    {
-        public readonly IEnumerator Enumerator;
-        public CommandStartCoroutine(IEnumerator enumerator) { Enumerator = enumerator; }
-    }
-    //TODO:enable
-    /*
+    
+    
     public abstract class ComplexHumanInstanceEvent : NamedEvent
     {
         protected ComplexHumanInstanceEvent(IComplexHuman human) : base(human.ID) { Human = human; }
@@ -167,6 +167,28 @@ namespace Unianio.Events
             Next = next;
         }
     }
+    public abstract class ComplexHumanGlobalEvent : BaseEvent
+    {
+        protected ComplexHumanGlobalEvent(IComplexHuman human) { Human = human; }
+        public IComplexHuman Human { get; }
+    }
+    internal class HumanCreated : ComplexHumanGlobalEvent { internal HumanCreated(IComplexHuman human) : base(human) { } }
+    internal class HumanDestroyed : ComplexHumanGlobalEvent { internal HumanDestroyed(IComplexHuman human) : base(human) { } }
+    public class HumanRegistered : ComplexHumanGlobalEvent { public HumanRegistered(IComplexHuman human) : base(human) { } }
+    public class HumanUnregistered : ComplexHumanGlobalEvent { public HumanUnregistered(IComplexHuman human) : base(human) { } }
+
+    public class BeforeCreatingHuman : BaseEvent
+    {
+        public MakeHumanDefinition Definition { get; }
+        public string CustomTag { get; }
+        public IList<IHumanExtender> Extenders { get; }
+        public BeforeCreatingHuman(MakeHumanDefinition mhd, string customTag)
+        {
+            Definition = mhd;
+            CustomTag = customTag;
+            Extenders = new List<IHumanExtender>();
+        }
+    }
 
     public class RegisterSoftBodyConfig : ComplexHumanInstanceEvent
     {
@@ -181,13 +203,10 @@ namespace Unianio.Events
             Config = config;
         }
     }
+    //TODO:enable
+    /*
     public class PlayerBlinkAniStarts : BaseEvent { }
     public class PlayerBlinkAniEnds : BaseEvent { }
-    public abstract class ComplexHumanGlobalEvent : BaseEvent
-    {
-        protected ComplexHumanGlobalEvent(IComplexHuman human) { Human = human; }
-        public IComplexHuman Human { get; }
-    }
     public class TeleportRequest : BaseEvent
     {
         public readonly BodySide Side;

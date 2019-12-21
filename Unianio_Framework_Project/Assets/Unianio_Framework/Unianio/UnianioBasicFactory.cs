@@ -1,4 +1,7 @@
-﻿using Unianio.Services;
+﻿using Unianio.Enums;
+using Unianio.Human;
+using Unianio.MakeHuman;
+using Unianio.Services;
 
 namespace Unianio
 {
@@ -12,6 +15,7 @@ namespace Unianio
             //RegisterFactoryType<ISomething, Something>();
 
             // identifiers
+            RegisterSingletonType<IHumanBoneWrapper, MakeHumanBoneWrapper>(HumanoidType.MakeHuman.ToString());
 //            DefineIdentifierForType<IVisualTestsScene>(scene.VisualTests);
         }
     }
