@@ -155,6 +155,11 @@ namespace Unianio.Static
             => (float)(a + (b - a) * t);
 
 
+        public static float sharpstep(double edge0, double edge1, double x)
+        {
+            return (float)x.FromRangeTo01(edge0, edge1).Clamp01();
+        }
+
         public static float smoothstep(double x) => smoothstep(0, 1, x);
 
         public static float smootherstep(double x) => smootherstep(0, 1, x);

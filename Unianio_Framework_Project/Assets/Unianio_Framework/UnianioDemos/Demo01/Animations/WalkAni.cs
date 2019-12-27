@@ -41,9 +41,9 @@ namespace UnianioDemos.Demo01
             pushLegMove.Model
                 .LineTo(
                     pushSide.By(0.07).AddBk(0.30).WithY(FootY))
-                    .WrapPos((x, v) => new Vector3(v.x, v.y + 0.1f * pow(x, 8), v.z))
+                    .WrapPos((x, v) => new Vector3(v.x, v.y + 0.08f * sharpstep(0.80, 1.00, x), v.z))
                 .RotateTo2(
-                    v3.fw, v3.up, 0.75, v3.fw.RotDn(30), v3.up)
+                    v3.fw, v3.up, 0.80, v3.fw.RotDn(30), v3.up)
                 ;
 
             stepArmMove.Local.CurveRelToMid(
