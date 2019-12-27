@@ -122,6 +122,18 @@ namespace Unianio.Moves
                 func
             ));
         }
+        public Mover<T> CurveRelToMid(Vector3 target, Vector3 control, double relLength, Func<double, double> func = null)
+            => CurveRelToMid(m => target, m => control, relLength, func);
+        public Mover<T> CurveRelToMid(Func<T, Vector3> getTarget, Func<T, Vector3> getControl, double relLength, Func<double, double> func = null)
+        {
+            var pos = _obj.GetPosBySpace(_currentSpace);
+            return SetPos(move.Curve(
+                m => _posMergeFunc != null ? lerp(in pos, in _startPos, _posMergeFunc(m.X)) : pos,
+                m => lerp(m.From, m.To, 0.5) + getControl(_obj) * (distance.Between(m.From, m.To) * (float)relLength),
+                m => getTarget(_obj),
+                func
+            ));
+        }
 
         public Mover<T> CurveRelToStart(Vector3 target, Vector3 control, Func<double, double> func = null)
             => CurveRelToStart(m => target, m => control, func);

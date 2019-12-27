@@ -35,8 +35,8 @@ namespace UnianioDemos.Demo01
 
             stepLegMove.Model
                 .CurveRelToMid(
-                    stepSide.By(0.07).AddFw(0.3).WithY(FootY), v3.up.By(0.5))
-                .RotateTo2(v3.fw.RotDn(30), v3.up, 0.5, v3.fw, v3.up)
+                    stepSide.By(0.07).AddFw(0.3).WithY(FootY), v3.up, 0.5)
+                .RotateTo2(v3.fw.RotDn(25), v3.up, 0.5, v3.fw, v3.up)
                 ;              ;
             pushLegMove.Model
                 .LineTo(
@@ -47,10 +47,10 @@ namespace UnianioDemos.Demo01
                 ;
 
             stepArmMove.Local.CurveRelToMid(
-                stepArm.IniLocalPos.RotDn(30).RotBk(37).By(0.95), v3.dn.By(0.1))
+                stepArm.IniLocalPos.RotDn(30).RotBk(37).By(0.95), v3.dn, 0.2)
                 .NaturalHandRotation();
             pushArmMove.Local.CurveRelToMid(
-                pushArm.IniLocalPos.RotDn(30).RotFw(10).By(0.92), v3.dn.By(0.1))
+                pushArm.IniLocalPos.RotDn(30).RotFw(10).By(0.92), v3.dn, 0.2)
                 .NaturalHandRotation();
 
             hands<HumHandRelaxedAni>(Human);
