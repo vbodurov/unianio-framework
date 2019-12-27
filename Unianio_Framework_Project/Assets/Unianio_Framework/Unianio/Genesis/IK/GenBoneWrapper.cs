@@ -2,6 +2,7 @@
 using Unianio.Extensions;
 using Unianio.Genesis.IK.Input;
 using Unianio.Human.Input;
+using Unianio.Moves;
 using Unianio.Rigged;
 using Unianio.Rigged.IK;
 using UnityEngine;
@@ -12,17 +13,17 @@ namespace Unianio.Genesis.IK
     public class GenBoneWrapper : Manipulator3DBase, IInitialOrientationHolder
     {
         readonly Transform _bone;
-        Vector3 _iniLocalPos, _iniModelPos, _iniLocalUp, _iniLocalFw, _iniModelUp, _iniModelFw;
+        Vector3 _iniLocalPos, _iniModelPos, _iniLocalUp, _iniLocalFw, _iniModelUp, _iniModelFw, _iniLocalScale;
         Quaternion _iniLocalRot, _iniModelRot;
         readonly HumanBoneInput _input;
 
-        public GenBoneWrapper(Transform model, Transform unwrappedBone, Vector3 forwardInWorldSpace, Vector3 upInWorldSpace) : base(HumanoidPart.Nothing)
+        public GenBoneWrapper(Transform model, Transform unwrappedBone, Vector3 forwardInWorldSpace, Vector3 upInWorldSpace) : base(BodyPart.Nothing)
         {
-            _input = new HumanBoneInput(HumanoidPart.Nothing, model, unwrappedBone);
+            _input = new HumanBoneInput(BodyPart.Nothing, model, unwrappedBone);
             _bone = wrapTransformInHolder(unwrappedBone.parent, unwrappedBone, forwardInWorldSpace, forwardInWorldSpace.GetRealUp(upInWorldSpace));
             RecalculateOriginals();
         }
-        public GenBoneWrapper(HumanoidPart part, Transform model, Transform existingWrapper) : base(part)
+        public GenBoneWrapper(BodyPart part, Transform model, Transform existingWrapper) : base(part)
         {
             _input = new HumanBoneInput(part, model, existingWrapper);
             _bone = existingWrapper;
@@ -36,6 +37,7 @@ namespace Unianio.Genesis.IK
         }
         public GenBoneWrapper RecalculateOriginals()
         {
+            _iniLocalScale = _bone.localScale;
             _iniLocalPos = _bone.localPosition;
             _iniModelPos = _bone.position.AsLocalPoint(_input.Model);
             _iniLocalRot = _bone.localRotation;
@@ -47,10 +49,23 @@ namespace Unianio.Genesis.IK
             return this;
         }
         public Transform Holder => _bone;
-        public Vector3 position { get { return _bone.position; } set { _bone.position = value; } }
-        public Vector3 localPosition { get { return _bone.localPosition; } set { _bone.localPosition = value; } }
-        public Quaternion rotation { get { return _bone.rotation; } set { _bone.rotation = value; } }
-        public Quaternion localRotation { get { return _bone.localRotation; } set { _bone.localRotation = value; } }
+        public Vector3 position {
+            get => _bone.position;
+            set => _bone.position = value;
+        }
+        public Vector3 localPosition {
+            get => _bone.localPosition;
+            set => _bone.localPosition = value;
+        }
+        public Quaternion rotation {
+            get => _bone.rotation;
+            set => _bone.rotation = value;
+        }
+        public Quaternion localRotation
+        {
+            get => _bone.localRotation;
+            set => _bone.localRotation = value;
+        }
         public Vector3 forward => _bone.forward;
         public Vector3 back => -_bone.forward;
         public Vector3 right => _bone.right;
@@ -67,10 +82,31 @@ namespace Unianio.Genesis.IK
         internal float IniModelY => _iniModelPos.y;
         public Quaternion IniLocalRot => _iniLocalRot;
         public Quaternion IniModelRot => _iniModelRot;
+        public Vector3 IniLocalSca => _iniLocalScale;
         public Vector3 IniLocalFw => _iniLocalFw;
         public Vector3 IniLocalUp => _iniLocalUp;
         public Vector3 IniModelFw => _iniModelFw;
         public Vector3 IniModelUp => _iniModelUp;
+        public IExecutorOfProgress ToInitialLocalPosition()
+        {
+            return new Mover<GenBoneWrapper>(this).New().Local.LineTo(b => b.IniLocalPos);
+        }
+        public IExecutorOfProgress ToInitialLocalRotation()
+        {
+            return new Mover<GenBoneWrapper>(this).New().Local.RotateTo(b => b.IniLocalRot);
+        }
+        public IExecutorOfProgress ToInitialLocalScale()
+        {
+            return new Mover<GenBoneWrapper>(this).New().Local.ScaleTo(b => b.IniLocalSca);
+        }
+        public IExecutorOfProgress ToInitialLocal()
+        {
+            return new Mover<GenBoneWrapper>(this).New().Local
+                    .LineTo(b => b.IniLocalPos)
+                    .RotateTo(b => b.IniLocalRot)
+                    .ScaleTo(b => b.IniLocalSca)
+                ;
+        }
         public Vector3 IniFwInWorldSpace => (_iniLocalRot * Vector3.forward).AsWorldDir(_bone.parent);
         public Vector3 IniUpInWorldSpace => (_iniLocalRot * Vector3.up).AsWorldDir(_bone.parent);
         public Quaternion IniLocRotInWorldSpace =>
@@ -137,7 +173,7 @@ namespace Unianio.Genesis.IK
 
         public override ManipulatorType ManipulatorType => ManipulatorType.Chain;
         public override Transform Model => _input.Model;
-        public override Transform Manipulator => Holder;
+        public override Transform Control => Holder;
         public override Vector3 ModelPos => Holder.position.AsLocalPoint(Model);
         public override Vector3 ModelFw => Holder.forward.AsLocalDir(Model);
         public override Vector3 ModelUp => Holder.up.AsLocalDir(Model);

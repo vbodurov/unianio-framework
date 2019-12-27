@@ -193,9 +193,9 @@ namespace Unianio.Events
     public class RegisterSoftBodyConfig : ComplexHumanInstanceEvent
     {
         public BodySide Side { get; }
-        public HumanoidPart Part { get; }
+        public BodyPart Part { get; }
         public SoftBodyConfig Config { get; }
-        public RegisterSoftBodyConfig(IComplexHuman human, BodySide side, HumanoidPart part, SoftBodyConfig config) 
+        public RegisterSoftBodyConfig(IComplexHuman human, BodySide side, BodyPart part, SoftBodyConfig config) 
             : base(human)
         {
             Side = side;

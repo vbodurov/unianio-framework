@@ -6,7 +6,6 @@ using System.Linq;
 using Unianio.Animations;
 using Unianio.Enums;
 using Unianio.Extensions;
-using Unianio.Graphs;
 using Unianio.Services;
 using UnityEngine;
 using Unianio.Rigged;
@@ -14,6 +13,7 @@ using Unianio.Genesis;
 using Unianio.Genesis.IK;
 using Unianio.Animations.Common;
 using Unianio.IK;
+using Unianio.Moves;
 using Unianio.RSG;
 
 namespace Unianio.Static
@@ -542,20 +542,21 @@ namespace Unianio.Static
             var x = ((Time.time - iniTime) / duration);
             return (float)func(x);
         }
-        public static void updateAndRetainHandRotationRelToElbow(HumArmChain chain)
+        public static void ensudeHandRotation(IHumArmChain chain, in Vector3 localUp)
         {
-            var locFw = chain.Handle.forward.AsLocalDir(chain.Forearm);
-            var locUp = chain.Handle.up.AsLocalDir(chain.Forearm);
-            chain.Update();
-            chain.Handle.rotation =
-                Quaternion.LookRotation(
-                    locFw.AsWorldDir(chain.Forearm),
-                    locUp.AsWorldDir(chain.Forearm));
+            chain.CalculateArmBend(out var midPos, out var length);
+            var handlePos = chain.Control.position;
+            var dirShoulderToHand = chain.Shoulder.DirTo(in handlePos);
+            vector.ProjectOnPlane(localUp.AsWorldDir(chain.ArmRoot), in dirShoulderToHand, out var projUp);
+            var elbowPos = midPos + projUp * length;
+            chain.Control.rotation = lookAt(elbowPos.DirTo(in handlePos), in projUp);
         }
-        public static void updateAndRetainHandRotationRelToElbow(HumArmChain a, HumArmChain b)
+        public static void ensureHandsRotation(
+            IHumArmChain a, in Vector3 aLocalUp, 
+            IHumArmChain b, in Vector3 bLocalUp)
         {
-            updateAndRetainHandRotationRelToElbow(a);
-            updateAndRetainHandRotationRelToElbow(b);
+            ensudeHandRotation(a, in aLocalUp);
+            ensudeHandRotation(b, in bLocalUp);
         }
         public static void update(IUpdatable a) { a.Update(); }
         public static void update(IUpdatable a, IUpdatable b) { a.Update(); b.Update(); }
@@ -1380,7 +1381,7 @@ namespace Unianio.Static
             return holder;
         }
         public static Transform CreateHandle(
-            Transform handleParent, HumanoidPart part, bool isHandleVisibled,
+            Transform handleParent, BodyPart part, bool isHandleVisibled,
             Vector3 worldPosition, Vector3 worldForward, Vector3 worldUp)
         {
             GameObject handle;

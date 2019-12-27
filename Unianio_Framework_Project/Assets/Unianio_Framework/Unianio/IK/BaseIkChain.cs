@@ -14,7 +14,7 @@ namespace Unianio.IK
         protected Transform _handle, _model;
         
 
-        protected BaseIkChain(HumanoidPart part) : base(part) {}
+        protected BaseIkChain(BodyPart part) : base(part) {}
 
         public Transform Handle => _handle;
         public virtual void Update()
@@ -48,7 +48,7 @@ namespace Unianio.IK
         protected abstract void ProcessMove(bool hasPositionChange, bool hasRotationChange);
         public override ManipulatorType ManipulatorType => ManipulatorType.Chain;
         public override Transform Model => _model;
-        public override Transform Manipulator => Handle;
+        public override Transform Control => Handle;
         public override Vector3 ModelPos => Handle.position.AsLocalPoint(Model);
         public override Vector3 ModelFw => Handle.forward.AsLocalDir(Model);
         

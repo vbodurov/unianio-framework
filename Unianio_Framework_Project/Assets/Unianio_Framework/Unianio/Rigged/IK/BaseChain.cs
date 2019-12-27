@@ -14,7 +14,7 @@ namespace Unianio.Rigged.IK
         protected Transform _handle;
         protected bool _canChangeRotation = true;
 
-        public Transform Handle => _handle;
+        public virtual Transform Handle => _handle;
         public abstract Transform[] AllJoins { get; }
         public Vector3 HandlePositionInLocalSpace => _handle.localPosition;
         public Vector3 HandleForwardInLocalSpace => _handle.parent.InverseTransformDirection(_handle.forward);
@@ -31,7 +31,7 @@ namespace Unianio.Rigged.IK
         public override Vector3 LocalUp => HandleUpInLocalSpace;
         public override Vector3 LocalScale => HandleScaleInLocalSpace;
         public override ManipulatorType ManipulatorType => ManipulatorType.Chain;
-        protected BaseChain(HumanoidPart part) : base(part) { }
+        protected BaseChain(BodyPart part) : base(part) { }
 
         protected abstract void ProcessMove(bool hasPositionChange, bool hasRotationChange);
 
@@ -54,7 +54,7 @@ namespace Unianio.Rigged.IK
             return hasChange;
         }
 
-        protected static Transform CreateRoot(HumanoidPart part, Transform first)
+        protected static Transform CreateRoot(BodyPart part, Transform first)
         {
             var root = first.parent;
             var holderGameObj = new GameObject(part + HolderSuffix);
@@ -65,7 +65,7 @@ namespace Unianio.Rigged.IK
             first.SetParent(holder);
             return holder;
         }
-        public static Transform CreateRoot(HumanoidPart part, Transform first, Vector3 worldPos, Vector3 worldLookAtTarget, Vector3 worldUp)
+        public static Transform CreateRoot(BodyPart part, Transform first, Vector3 worldPos, Vector3 worldLookAtTarget, Vector3 worldUp)
         {
             var parent = first.parent;
             var holderGameObj = new GameObject(part + HolderSuffix);
@@ -77,7 +77,7 @@ namespace Unianio.Rigged.IK
             return holder;
         }
         public static Transform CreateHandle(
-            Transform handleParent, HumanoidPart part, bool isHandleVisibled,
+            Transform handleParent, BodyPart part, bool isHandleVisibled,
             Vector3 worldPosition, Vector3 worldForward, Vector3 worldUp)
         {
             GameObject handle;

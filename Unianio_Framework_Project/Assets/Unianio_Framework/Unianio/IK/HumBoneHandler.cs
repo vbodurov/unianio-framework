@@ -2,6 +2,7 @@
 using Unianio.Extensions;
 using Unianio.Genesis.IK.Input;
 using Unianio.Human.Input;
+using Unianio.Moves;
 using Unianio.Rigged;
 using Unianio.Rigged.IK;
 using UnityEngine;
@@ -15,13 +16,13 @@ namespace Unianio.IK
         readonly HumanBoneInput _input;
 
 
-        public HumBoneHandler(Transform model, Transform bone) : base(HumanoidPart.Nothing)
+        public HumBoneHandler(Transform model, Transform bone) : base(BodyPart.Nothing)
         {
-            _input = new HumanBoneInput(HumanoidPart.Nothing, model, bone);
+            _input = new HumanBoneInput(BodyPart.Nothing, model, bone);
             _bone = bone;
             RecalculateOriginals();
         }
-        public HumBoneHandler(HumanoidPart part, Transform model, Transform bone) : base(part)
+        public HumBoneHandler(BodyPart part, Transform model, Transform bone) : base(part)
         {
             _input = new HumanBoneInput(part, model, bone);
             _bone = bone;
@@ -29,6 +30,7 @@ namespace Unianio.IK
         }
         void RecalculateOriginals()
         {
+            IniLocalSca = _bone.localScale;
             IniLocalPos = _bone.localPosition;
             IniModelPos = _bone.position.AsLocalPoint(_input.Model);
             IniLocalRot = _bone.localRotation;
@@ -67,10 +69,31 @@ namespace Unianio.IK
         public Vector3 IniModelPos { get; private set; }
         public Quaternion IniLocalRot { get; private set; }
         public Quaternion IniModelRot { get; private set; }
+        public Vector3 IniLocalSca { get; private set; }
         public Vector3 IniLocalFw => IniLocalRot * Vector3.forward;
         public Vector3 IniLocalUp => IniLocalRot * Vector3.up;
         public Vector3 IniModelFw => IniModelRot * Vector3.forward;
         public Vector3 IniModelUp => IniModelRot * Vector3.up;
+        public IExecutorOfProgress ToInitialLocalPosition()
+        {
+            return new Mover<HumBoneHandler>(this).New().Local.LineTo(b => b.IniLocalPos);
+        }
+        public IExecutorOfProgress ToInitialLocalRotation()
+        {
+            return new Mover<HumBoneHandler>(this).New().Local.RotateTo(b => b.IniLocalRot);
+        }
+        public IExecutorOfProgress ToInitialLocalScale()
+        {
+            return new Mover<HumBoneHandler>(this).New().Local.ScaleTo(b => b.IniLocalSca);
+        }
+        public IExecutorOfProgress ToInitialLocal()
+        {
+            return new Mover<HumBoneHandler>(this).New().Local
+                    .LineTo(b => b.IniLocalPos)
+                    .RotateTo(b => b.IniLocalRot)
+                    .ScaleTo(b => b.IniLocalSca)
+                ;
+        }
         public HumBoneHandler MoveTowards(in Vector3 worldTarget, double step = 360)
         {
             Holder.MoveTowards(worldTarget, step);
@@ -135,7 +158,7 @@ namespace Unianio.IK
 
         public override ManipulatorType ManipulatorType => ManipulatorType.Chain;
         public override Transform Model => _input.Model;
-        public override Transform Manipulator => Holder;
+        public override Transform Control => Holder;
         public override Vector3 ModelPos => Holder.position.AsLocalPoint(Model);
         public override Vector3 ModelFw => Holder.forward.AsLocalDir(Model);
         public override Vector3 ModelUp => Holder.up.AsLocalDir(Model);

@@ -341,7 +341,18 @@ namespace Unianio.Static
                 normX.Normalize();
                 GetNormal(in planeNormal, in normX, out normY);
             }
-
+            public static bool TryEnforceVectorNotBelowPlane(in Vector3 vec, in Vector3 planeNorm, out Vector3 projected)
+            {
+                if (vector.IsBelowPlane(in vec, in planeNorm))
+                {
+                    var iniMag = vec.magnitude;
+                    vector.ProjectOnPlane(in vec, in planeNorm, out projected);
+                    projected = projected.normalized * iniMag;
+                    return true;
+                }
+                projected = vec;
+                return false;
+            }
             public static void EnsurePointSameDirAs(in Vector3 direction, in Vector3 mustBeCodirectionalTo, out Vector3 sameDirection)
             {
                 if (PointSameDirection(in direction, in mustBeCodirectionalTo))
@@ -455,6 +466,12 @@ namespace Unianio.Static
                 Vector3 axis;
                 deltaRotation.ToAngleAxis(out angle, out axis);
                 return axis * angle * Mathf.Deg2Rad * (1.0f / fun.smoothDeltaTime);
+            }
+            public static Vector3 ProjectOnPlaneAndGetMiddle(in Vector3 v1, in Vector3 v2, in Vector3 planeNorm)
+            {
+                vector.ProjectOnPlane(in v1, in planeNorm, out var v1Proj);
+                vector.ProjectOnPlane(in v2, in planeNorm, out var v2Proj);
+                return slerp(v1Proj.normalized, v2Proj.normalized, 0.5);
             }
         }
 

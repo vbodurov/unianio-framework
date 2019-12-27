@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unianio.Services;
+using UnityEngine;
 using static Unianio.Static.fun;
 
 namespace Unianio.Animations
@@ -66,7 +67,6 @@ namespace Unianio.Animations
                 if (curr == null) _animations.AddFirst(a);
                 else _animations.AddAfter(curr, a);
             }
-
             if (a.IsGlDrawing)
             {
                 _animationsToDraw.AddLast(a);

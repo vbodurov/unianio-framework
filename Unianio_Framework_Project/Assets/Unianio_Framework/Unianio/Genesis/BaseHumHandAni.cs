@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using Unianio.Animations;
 using Unianio.Enums;
 using Unianio.Extensions;
-using Unianio.Graphs;
 using Unianio.IK;
+using Unianio.Moves;
 using UnityEngine;
 
 namespace Unianio.Genesis
@@ -13,7 +13,7 @@ namespace Unianio.Genesis
     {
         IComplexHuman _human;
         BodySide _side;
-        readonly IList<FingerAction> _actions = new List<FingerAction>();
+        readonly IList<ItemRotation> _actions = new List<ItemRotation>();
         readonly IDictionary<FingerName, IDictionary<int, Transform>> _fingers = new Dictionary<FingerName, IDictionary<int, Transform>>();
         IAnimation _fingersAni;
 
@@ -32,11 +32,12 @@ namespace Unianio.Genesis
         {
             var finger = _fingers[fingerName][index];
             var posRot = _human.Initial.Fingers[_side][fingerName][index];
-            _actions.Add(new FingerAction
+            _actions.Add(new ItemRotation
             {
-                Fw = vbp.Sphere(finger.localRotation * Vector3.forward, posRot.rotation * fwLoc, func),
-                Up = vbp.Sphere(finger.localRotation * Vector3.up, posRot.rotation * fwLoc.GetRealUp(upLoc), func),
-                Node = finger
+                Rotate = 
+                    move.Rotate(finger.localRotation * v3.fw, finger.localRotation * v3.up,
+                                posRot.rotation * fwLoc, posRot.rotation * fwLoc.GetRealUp(upLoc), func),
+                Item = finger
             });
         }
         protected void StartFingerRotation(double seconds)
@@ -48,10 +49,7 @@ namespace Unianio.Genesis
                 {
                     var a = _actions[i];
 
-                    a.Node.localRotation =
-                        Quaternion.LookRotation(
-                            a.Fw.GetValueByProgress(x),
-                            a.Up.GetValueByProgress(x));
+                    a.Item.localRotation = a.Rotate.GetValueByProgress(x);
                 }
             })
                 .MustBeUnique(ref _fingersAni)

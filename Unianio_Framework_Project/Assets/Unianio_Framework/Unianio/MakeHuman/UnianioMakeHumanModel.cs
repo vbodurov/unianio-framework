@@ -16,7 +16,7 @@ namespace Unianio.MakeHuman
         public string CustomTag = "";
         public bool HasBreasts;
         IComplexHuman _human;
-        void OnEnable()
+        void Start()
         {
             if(_human != null) return;
 

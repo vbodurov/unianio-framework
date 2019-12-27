@@ -8,9 +8,9 @@ using Unianio.Extensions;
 using Unianio.Genesis;
 using Unianio.Genesis.IK;
 using Unianio.Genesis.State;
-using Unianio.Graphs;
 using Unianio.Human;
 using Unianio.MakeHuman;
+using Unianio.Moves;
 using Unianio.PhysicsAgents;
 using Unianio.Rigged;
 using Unianio.Rigged.IK;
@@ -26,15 +26,15 @@ namespace Unianio.IK
         IRotatable,
         ILateUpdatable, 
         IIdHolder, 
-        IBaseManipulator,
+        IControlHolder,
         IRotatableAroundPivot,
         ITimeProviderHolder,
         IDisposable
     {
         string Persona { get; }
         Transform Model { get; }
-        HumArmChain ArmL { get; }
-        HumArmChain ArmR { get; }
+        IHumArmChain ArmL { get; }
+        IHumArmChain ArmR { get; }
         HumLegChain LegL { get; }
         HumLegChain LegR { get; }
         HumSpineChain Spine { get; }
@@ -63,31 +63,25 @@ namespace Unianio.IK
         Vector3 dn { get; }
         Transform SourceNeckUpper { get; }
         Transform SourceHead { get; }
-        HandlePath PathHandL { get; }
-        HandlePath PathHandR { get; }
-        HandlePath PathArmL { get; }
-        HandlePath PathArmR { get; }
-        NumericPath PathElbowArmL { get; }
-        NumericPath PathElbowArmR { get; }
-        DirectionPath PathBendDirArmL { get; }
-        DirectionPath PathBendDirArmR { get; }
-        HandlePath PathLegL { get; }
-        HandlePath PathLegR { get; }
-        HandlePath PathFootL { get; }
-        HandlePath PathFootR { get; }
-        HandlePath PathToesL { get; }
-        HandlePath PathToesR { get; }
-        HandlePath PathPelvis { get; }
-        HandlePath PathHip { get; }
-        HandlePath PathHead { get; }
-        HandlePath PathSpine { get; }
-        HandlePath PathJaw { get; }
-        HandlePath PathNeckLower { get; }
-        HandlePath PathNeckUpper { get; }
-        HandlePath PathTongue { get; }
-        HandlePath PathCollarL { get; }
-        HandlePath PathCollarR { get; }
-        FacePath PathFace { get; }
+        Mover<HumBoneHandler> MoveHandL { get; }
+        Mover<HumBoneHandler> MoveHandR { get; }
+        Mover<IHumArmChain> MoveArmL { get; }
+        Mover<IHumArmChain> MoveArmR { get; }
+        Mover<HumLegChain> MoveLegL { get; }
+        Mover<HumLegChain> MoveLegR { get; }
+        Mover<HumBoneHandler> MoveFootL { get; }
+        Mover<HumBoneHandler> MoveFootR { get; }
+        Mover<HumBoneHandler> MoveToesL { get; }
+        Mover<HumBoneHandler> MoveToesR { get; }
+        Mover<HumBoneHandler> MovePelvis { get; }
+        Mover<HumBoneHandler> MoveHip { get; }
+        Mover<HumBoneHandler> MoveHead { get; }
+        Mover<HumSpineChain> MoveSpine { get; }
+        Mover<HumBoneHandler> MoveJaw { get; }
+        Mover<HumBoneHandler> MoveNeckLower { get; }
+        Mover<HumBoneHandler> MoveNeckUpper { get; }
+        Mover<HumBoneHandler> MoveTongue { get; }
+//        FacePath PathFace { get; }
         IBlinkController Blinks { get; }
         void Disable();
         void Enable();
@@ -112,10 +106,16 @@ namespace Unianio.IK
         readonly List<IDisposable> _disposables = new List<IDisposable>();
         readonly List<INamedObjectSource> _objectSources = new List<INamedObjectSource>();
         readonly IDictionary<string, float> _timeByKey = new Dictionary<string, float>(StringComparer.InvariantCultureIgnoreCase);
+        Mover<HumBoneHandler> _moveHandL, _moveHandR, _moveFootL, _moveFootR,
+            _moveToesL, _moveToesR, _movePelvis, _moveHip, _moveHead,
+            _moveJaw, _moveNeckLower, _moveNeckUpper, _moveTongue;
+        Mover<HumSpineChain> _moveSpine;
+        Mover<IHumArmChain> _moveArmL, _moveArmR;
+        Mover<HumLegChain> _moveLegL, _moveLegR;
         ulong _id;
         HumanInitialStats _initialStats;
         IComplexHumanDefinition _definition;
-        HumArmChain _armL, _armR;
+        IHumArmChain _armL, _armR;
         HumLegChain _legL, _legR;
         HumSpineChain _spine;
 //        GenTongueChain _tongue;
@@ -126,12 +126,7 @@ namespace Unianio.IK
         HumBoneHandler _hip, _neckUpper, _head, _pelvis, _tongue,
             _braFront,_braBack,_pantiesFront,_pantiesBack, _nippleL, _nippleR, _collarL, _collarR;
         HumBreastGroup _breastL, _breastR;
-        HandlePath _pathHandL, _pathHandR, _pathArmL, _pathArmR, _pathLegL, _pathLegR, _pathFootL, 
-            _pathFootR, _pathToesL, _pathToesR, _pathPelvis, _pathHip, _pathHead, _pathSpine, _pathJaw,
-            _pathNeckLower, _pathNeckUpper, _pathTongue, _pathCollarL, _pathCollarR;
-        FacePath _pathFace;
-        NumericPath _pathElbowArmL, _pathElbowArmR;
-        DirectionPath _pathBendDirArmL, _pathBendDirArmR;
+        
         bool _isDisposed;
         IPausableTimeProvider _pausableTime;
 
@@ -142,7 +137,7 @@ namespace Unianio.IK
         }
         ulong IIdHolder.ID => _id;
         ulong IComplexHuman.Flags { get; set; }
-        Transform IBaseManipulator.Manipulator => _definition.Model;
+        Transform IControlHolder.Control => _definition.Model;
         IComplexHuman IComplexHuman.Set(IComplexHumanDefinition definition, params IHumanExtender[] extenders)
         {
             _definition = definition;
@@ -160,18 +155,27 @@ namespace Unianio.IK
             _head = new HumBoneHandler(m, _definition.Head.Bone);
             _tongue = new HumBoneHandler(m, _definition.Tongue.Tongue2);
             //            _tongue = new GenTongueChain(_definition);
-            _armL = new HumArmChain(HumanoidPart.ArmL, _definition);
-            _armR = new HumArmChain(HumanoidPart.ArmR, _definition);
+            if (_definition.HumanoidType == HumanoidType.Genesis8)
+            {
+                _armL = new Gen8ArmChain(BodyPart.ArmL, _definition);
+                _armR = new Gen8ArmChain(BodyPart.ArmR, _definition);
+            }
+            else //if (_definition.HumanoidType == HumanoidType.MakeHuman)
+            {
+                _armL = new MHArmChain(BodyPart.ArmL, _definition);
+                _armR = new MHArmChain(BodyPart.ArmR, _definition);
+            }
+            
 
-            _legL = new HumLegChain(HumanoidPart.LegL, _definition);
-            _legR = new HumLegChain(HumanoidPart.LegR, _definition);
+            _legL = new HumLegChain(BodyPart.LegL, _definition);
+            _legR = new HumLegChain(BodyPart.LegR, _definition);
             var humFaceConfigSource = extenders.FirstOrDefault(e => e is HumanFaceConfigSource) as HumanFaceConfigSource; 
             if (_definition.HumanoidType == HumanoidType.Genesis8)
                 _genFace = new GenFaceGroup(this, humFaceConfigSource);
             else if(_definition.HumanoidType == HumanoidType.MakeHuman)
                 _mhFace = new MHFaceGroup(this, humFaceConfigSource);
-            _collarL = new HumBoneHandler(HumanoidPart.CollarL, m, _definition.ArmL.Collar);
-            _collarR = new HumBoneHandler(HumanoidPart.CollarR, m, _definition.ArmR.Collar);
+            _collarL = new HumBoneHandler(BodyPart.CollarL, m, _definition.ArmL.Collar);
+            _collarR = new HumBoneHandler(BodyPart.CollarR, m, _definition.ArmR.Collar);
 
             if (_definition.HasCompletedImport)
             {
@@ -300,36 +304,29 @@ namespace Unianio.IK
         IComplexHumanDefinition IComplexHuman.Definition => _definition;
 
         IBlinkController IComplexHuman.Blinks => _this.IsGenesis8() ? _this.GenFace : (IBlinkController)_this.MHFace;
-        HandlePath IComplexHuman.PathCollarL => _pathCollarL ?? (_pathCollarL = new HandlePath(_collarL));
-        HandlePath IComplexHuman.PathCollarR => _pathCollarR ?? (_pathCollarR = new HandlePath(_collarR));
-        FacePath IComplexHuman.PathFace => _pathFace ?? (_pathFace = new FacePath(this));
-        HandlePath IComplexHuman.PathHandL => _pathHandL ?? (_pathHandL = new HandlePath(_armL.HandHandler));
-        HandlePath IComplexHuman.PathHandR => _pathHandR ?? (_pathHandR = new HandlePath(_armR.HandHandler));
-        HandlePath IComplexHuman.PathArmL => _pathArmL ?? (_pathArmL = new HandlePath(_armL));
-        HandlePath IComplexHuman.PathArmR => _pathArmR ?? (_pathArmR = new HandlePath(_armR));
-        NumericPath IComplexHuman.PathElbowArmL => _pathElbowArmL ?? (_pathElbowArmL = new NumericPath(n => _armL.ElbowBendFactor = n, () => _armL.ElbowBendFactor));
-        NumericPath IComplexHuman.PathElbowArmR => _pathElbowArmR ?? (_pathElbowArmR = new NumericPath(n => _armR.ElbowBendFactor = n, () => _armR.ElbowBendFactor));
-        DirectionPath IComplexHuman.PathBendDirArmL => _pathBendDirArmL ?? (_pathBendDirArmL = new DirectionPath(v => _armL.CustomBendDir = v, () => _armL.LastBenDir, _definition.Model, _armL.Root));
-        DirectionPath IComplexHuman.PathBendDirArmR => _pathBendDirArmR ?? (_pathBendDirArmR = new DirectionPath(v => _armR.CustomBendDir = v, () => _armR.LastBenDir, _definition.Model, _armR.Root));
-        HandlePath IComplexHuman.PathLegL => _pathLegL ?? (_pathLegL = new HandlePath(_legL));
-        HandlePath IComplexHuman.PathLegR => _pathLegR ?? (_pathLegR = new HandlePath(_legR));
-        HandlePath IComplexHuman.PathFootL => _pathFootL ?? (_pathFootL = new HandlePath(_legL.FootHandler));
-        HandlePath IComplexHuman.PathFootR => _pathFootR ?? (_pathFootR = new HandlePath(_legR.FootHandler));
-        HandlePath IComplexHuman.PathToesL => _pathToesL ?? (_pathToesL = new HandlePath(_legL.ToeHandler));
-        HandlePath IComplexHuman.PathToesR => _pathToesR ?? (_pathToesR = new HandlePath(_legR.ToeHandler));
-        HandlePath IComplexHuman.PathPelvis => _pathPelvis ?? (_pathPelvis = new HandlePath(_pelvis));
-        HandlePath IComplexHuman.PathHip => _pathHip ?? (_pathHip = new HandlePath(_hip));
-        HandlePath IComplexHuman.PathHead => _pathHead ?? (_pathHead = new HandlePath(_head));
-        HandlePath IComplexHuman.PathTongue => _pathTongue ?? (_pathTongue = new HandlePath(_tongue));
-        HandlePath IComplexHuman.PathNeckLower => _pathNeckLower ?? (_pathNeckLower = new HandlePath(_spine.NeckLowerHandler));
-        HandlePath IComplexHuman.PathNeckUpper => _pathNeckUpper ?? (_pathNeckUpper = new HandlePath(_neckUpper));
+        Mover<HumBoneHandler> IComplexHuman.MoveHandL => _moveHandL ?? (_moveHandL = new Mover<HumBoneHandler>(_armL.HandHandler));
+        Mover<HumBoneHandler> IComplexHuman.MoveHandR => _moveHandR ?? (_moveHandR = new Mover<HumBoneHandler>(_armR.HandHandler));
+        Mover<IHumArmChain> IComplexHuman.MoveArmL => _moveArmL ?? (_moveArmL = new Mover<IHumArmChain>(_armL));
+        Mover<IHumArmChain> IComplexHuman.MoveArmR => _moveArmR ?? (_moveArmR = new Mover<IHumArmChain>(_armR));
+        Mover<HumLegChain> IComplexHuman.MoveLegL => _moveLegL ?? (_moveLegL = new Mover<HumLegChain>(_legL));
+        Mover<HumLegChain> IComplexHuman.MoveLegR => _moveLegR ?? (_moveLegR = new Mover<HumLegChain>(_legR));
+        Mover<HumBoneHandler> IComplexHuman.MoveFootL => _moveFootL ?? (_moveFootL = new Mover<HumBoneHandler>(_legL.FootHandler));
+        Mover<HumBoneHandler> IComplexHuman.MoveFootR => _moveFootR ?? (_moveFootR = new Mover<HumBoneHandler>(_legR.FootHandler));
+        Mover<HumBoneHandler> IComplexHuman.MoveToesL => _moveToesL ?? (_moveToesL = new Mover<HumBoneHandler>(_legL.ToeHandler));
+        Mover<HumBoneHandler> IComplexHuman.MoveToesR => _moveToesR ?? (_moveToesR = new Mover<HumBoneHandler>(_legR.ToeHandler));
+        Mover<HumBoneHandler> IComplexHuman.MovePelvis => _movePelvis ?? (_movePelvis = new Mover<HumBoneHandler>(_pelvis));
+        Mover<HumBoneHandler> IComplexHuman.MoveHip => _moveHip ?? (_moveHip = new Mover<HumBoneHandler>(_hip));
+        Mover<HumBoneHandler> IComplexHuman.MoveHead => _moveHead ?? (_moveHead = new Mover<HumBoneHandler>(_head));
+        Mover<HumBoneHandler> IComplexHuman.MoveTongue => _moveTongue ?? (_moveTongue = new Mover<HumBoneHandler>(_tongue));
+        Mover<HumBoneHandler> IComplexHuman.MoveNeckLower => _moveNeckLower ?? (_moveNeckLower = new Mover<HumBoneHandler>(_spine.NeckLowerHandler));
+        Mover<HumBoneHandler> IComplexHuman.MoveNeckUpper => _moveNeckUpper ?? (_moveNeckUpper = new Mover<HumBoneHandler>(_neckUpper));
+        Mover<HumSpineChain> IComplexHuman.MoveSpine => _moveSpine ?? (_moveSpine = new Mover<HumSpineChain>(_spine));
+        Mover<HumBoneHandler> IComplexHuman.MoveJaw => _moveJaw ?? (_moveJaw = new Mover<HumBoneHandler>(_this.IsGenesis8() ? _genFace.LowerJaw : _mhFace.Jaw));
         Transform IComplexHuman.GetBoneByName(string name) => _definition.BonesByName.GetOrDefault(name);
-        HandlePath IComplexHuman.PathSpine => _pathSpine ?? (_pathSpine = new HandlePath(_spine));
-        HandlePath IComplexHuman.PathJaw => _pathJaw ?? (_pathJaw = new HandlePath(_this.IsGenesis8() ? _genFace.LowerJaw : _mhFace.Jaw));
         HumanInitialStats IComplexHuman.Initial => _initialStats;
         Transform IComplexHuman.Model => _definition.Model;
-        HumArmChain IComplexHuman.ArmL => _armL;
-        HumArmChain IComplexHuman.ArmR => _armR;
+        IHumArmChain IComplexHuman.ArmL => _armL;
+        IHumArmChain IComplexHuman.ArmR => _armR;
         HumLegChain IComplexHuman.LegL => _legL;
         HumLegChain IComplexHuman.LegR => _legR;
         HumSpineChain IComplexHuman.Spine => _spine;

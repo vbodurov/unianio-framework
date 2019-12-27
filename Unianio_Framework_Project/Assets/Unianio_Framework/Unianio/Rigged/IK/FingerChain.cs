@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Unianio.Enums;
 using Unianio.Extensions;
+using Unianio.Moves;
 using Unianio.Static;
 using UnityEngine;
 using static Unianio.Static.fun;
@@ -68,14 +69,14 @@ namespace Unianio.Rigged.IK
             _lengths = new[] { _len0, _len1, _len2 };
         }
 
-        static HumanoidPart ToHumanPart(FingerName finger, BodySide side)
+        static BodyPart ToHumanPart(FingerName finger, BodySide side)
         {
             var isLeft = side == BodySide.Left;
-            if(finger == FingerName.Thumb) return isLeft ? HumanoidPart.FingerThumbL : HumanoidPart.FingerThumbR;
-            if(finger == FingerName.Index) return isLeft ? HumanoidPart.FingerIndexL : HumanoidPart.FingerIndexR;
-            if(finger == FingerName.Middle) return isLeft ? HumanoidPart.FingerMiddleL : HumanoidPart.FingerMiddleR;
-            if(finger == FingerName.Ring) return isLeft ? HumanoidPart.FingerRingL : HumanoidPart.FingerRingR;
-            if(finger == FingerName.Pinky) return isLeft ? HumanoidPart.FingerPinkyL : HumanoidPart.FingerPinkyR;
+            if(finger == FingerName.Thumb) return isLeft ? BodyPart.FingerThumbL : BodyPart.FingerThumbR;
+            if(finger == FingerName.Index) return isLeft ? BodyPart.FingerIndexL : BodyPart.FingerIndexR;
+            if(finger == FingerName.Middle) return isLeft ? BodyPart.FingerMiddleL : BodyPart.FingerMiddleR;
+            if(finger == FingerName.Ring) return isLeft ? BodyPart.FingerRingL : BodyPart.FingerRingR;
+            if(finger == FingerName.Pinky) return isLeft ? BodyPart.FingerPinkyL : BodyPart.FingerPinkyR;
             throw new ArgumentException("Unknown finger="+finger+" and side="+side);
         }
         public BodySide BodySide => _side;
@@ -123,7 +124,8 @@ namespace Unianio.Rigged.IK
         }
         public override Transform[] AllJoins => _allJoins;
         public override Transform Model => _model;
-        public override Transform Manipulator => _handle;
+        public override Transform Handle => _handle;
+        public override Transform Control => _handle;
 
         Vector3 _iniLocalPos, _iniModelPos, _iniLocalFw, _iniLocalUp, _iniModelFw, _iniModelUp;
         Quaternion _iniLocalRot, _iniModelRot;
@@ -131,9 +133,30 @@ namespace Unianio.Rigged.IK
         public Vector3 IniModelPos => _iniModelPos;
         public Quaternion IniLocalRot => _iniLocalRot;
         public Quaternion IniModelRot => _iniModelRot;
+        public Vector3 IniLocalSca => v3.one;
         public Vector3 IniLocalFw => _iniLocalFw;
         public Vector3 IniLocalUp => _iniLocalUp;
         public Vector3 IniModelFw => _iniModelFw;
         public Vector3 IniModelUp => _iniModelUp;
+        public IExecutorOfProgress ToInitialLocalPosition()
+        {
+            return new Mover<FingerChain>(this).New().Local.LineTo(b => b.IniLocalPos);
+        }
+        public IExecutorOfProgress ToInitialLocalRotation()
+        {
+            return new Mover<FingerChain>(this).New().Local.RotateTo(b => b.IniLocalRot);
+        }
+        public IExecutorOfProgress ToInitialLocalScale()
+        {
+            return new Mover<FingerChain>(this).New().Local.ScaleTo(b => b.IniLocalSca);
+        }
+        public IExecutorOfProgress ToInitialLocal()
+        {
+            return new Mover<FingerChain>(this).New().Local
+                    .LineTo(b => b.IniLocalPos)
+                    .RotateTo(b => b.IniLocalRot)
+                    .ScaleTo(b => b.IniLocalSca)
+                ;
+        }
     }
 }

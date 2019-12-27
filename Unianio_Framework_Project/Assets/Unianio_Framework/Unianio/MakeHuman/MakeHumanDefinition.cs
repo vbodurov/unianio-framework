@@ -64,9 +64,11 @@ namespace Unianio.MakeHuman
             var tongue04 = d[mhBone.tongue04];
 
             // arm left:
+            var armRootL = d.GetOrDefault(mhBone.arm_root_L);
             var collarL = d[mhBone.clavicle_L];
-            var shoulderL = d[mhBone.shoulder01_L];//d[mhBone.upperarm01_L];
-            var shoulderL_2 = d[mhBone.upperarm01_L];
+            var shoulderL = d[mhBone.upperarm01_L];//d[mhBone.upperarm01_L];
+//            var shoulderL = d[mhBone.shoulder01_L];//d[mhBone.upperarm01_L];
+            var shoulderL_2 = d[mhBone.shoulder01_L];
             var shoulderTwistL = d[mhBone.upperarm02_L];
             var forearmL = d[mhBone.lowerarm01_L];
             var forearmTwistL = d[mhBone.lowerarm02_L];
@@ -93,9 +95,11 @@ namespace Unianio.MakeHuman
             var thumb3L = d[mhBone.finger1_3_L];
 
             // arm right:
+            var armRootR = d.GetOrDefault(mhBone.arm_root_R);
             var collarR = d[mhBone.clavicle_R];//d[mhBone.shoulder01_R];
-            var shoulderR = d[mhBone.shoulder01_R];//d[mhBone.upperarm01_R];
-            var shoulderR_2 = d[mhBone.upperarm01_R];
+            var shoulderR = d[mhBone.upperarm01_R];//d[mhBone.upperarm01_R];
+//            var shoulderR = d[mhBone.shoulder01_R];//d[mhBone.upperarm01_R];
+            var shoulderR_2 = d[mhBone.shoulder01_R];
             var shoulderTwistR = d[mhBone.upperarm02_R];
             var forearmR = d[mhBone.lowerarm01_R];
             var forearmTwistR = d[mhBone.lowerarm02_R];
@@ -199,27 +203,27 @@ namespace Unianio.MakeHuman
 
             _hasCompletedImport = footHolderL != null;
 
-            _root = new HumanBoneInput(HumanoidPart.EntireBody, _model, root);
-            _hip = new HumanBoneInput(HumanoidPart.Hip, _model, hip);
-            _armL = new HumanArmInput(part: HumanoidPart.ArmL, model: _model,
+            _root = new HumanBoneInput(BodyPart.EntireBody, _model, root);
+            _hip = new HumanBoneInput(BodyPart.Hip, _model, hip);
+            _armL = new HumanArmInput(part: BodyPart.ArmL, model: _model, armRoot: armRootL,
                 collar: collarL, shoulder: shoulderL, shoulder_2: shoulderL_2, shoulderTwist: shoulderTwistL, forearm: forearmL, forearmTwist: forearmTwistL, hand: handL,
                 index0: index0L, index1: index1L, index2: index2L, index3: index3L,
                 middle0: middle0L, middle1: middle1L, middle2: middle2L, middle3: middle3L,
                 ring0: ring0L, ring1: ring1L, ring2: ring2L, ring3: ring3L,
                 pinky0: pinky0L, pinky1: pinky1L, pinky2: pinky2L, pinky3: pinky3L,
                 thumb1: thumb1L, thumb2: thumb2L, thumb3: thumb3L);
-            _armR = new HumanArmInput(part: HumanoidPart.ArmR, model: _model,
+            _armR = new HumanArmInput(part: BodyPart.ArmR, model: _model, armRoot: armRootR,
                 collar: collarR, shoulder: shoulderR, shoulder_2: shoulderR_2, shoulderTwist: shoulderTwistR, forearm: forearmR, forearmTwist: forearmTwistR, hand: handR,
                 index0: index0R, index1: index1R, index2: index2R, index3: index3R,
                 middle0: middle0R, middle1: middle1R, middle2: middle2R, middle3: middle3R,
                 ring0: ring0R, ring1: ring1R, ring2: ring2R, ring3: ring3R,
                 pinky0: pinky0R, pinky1: pinky1R, pinky2: pinky2R, pinky3: pinky3R,
                 thumb1: thumb1R, thumb2: thumb2R, thumb3: thumb3R);
-            _legL = new HumanLegInput(part: HumanoidPart.LegL, model: _model, thighBend: thighBendL, thighTwist: thighTwistL,
+            _legL = new HumanLegInput(part: BodyPart.LegL, model: _model, thighBend: thighBendL, thighTwist: thighTwistL,
                 shin: shinL, foot: footL, footHolder: footHolderL, metatarsals: metatarsalsL, toe: toeL, toeHolder: toeHolderL, bigToe: null, bigToe2: null,
                 smallToe11: null, smallToe12: null, smallToe21: null, smallToe22: null,
                 smallToe31: null, smallToe32: null, smallToe41: null, smallToe42: null);
-            _legR = new HumanLegInput(part: HumanoidPart.LegR, model: _model, thighBend: thighBendR, thighTwist: thighTwistR,
+            _legR = new HumanLegInput(part: BodyPart.LegR, model: _model, thighBend: thighBendR, thighTwist: thighTwistR,
                 shin: shinR, foot: footR, footHolder: footHolderR, metatarsals: metatarsalsR, toe: toeR, toeHolder: toeHolderR, 
                 bigToe: null, bigToe2: null,
                 smallToe11: null, smallToe12: null, smallToe21: null, smallToe22: null,
@@ -264,11 +268,11 @@ namespace Unianio.MakeHuman
                 oculi01_L: oculi01_L);
             _tongue = new HumanTongueInput(_model, tongue01, tongue02, tongue03, tongue04);
             _spine = new HumanSpineInput(_model, hip, abdomenLower, abdomenUpper, chestLower, chestUpper, neckLower, neckUpper);
-            _pelvis = new HumanBoneInput(HumanoidPart.Pelvis, _model, pelvis);
-            _upperNeck = new HumanBoneInput(HumanoidPart.Neck, _model, neckUpper);
-            _head = new HumanBoneInput(HumanoidPart.Head, _model, head);
-            if (breastL != null) _breastL = new HumanBoneInput(HumanoidPart.BreastL, _model, breastL);
-            if (breastR != null) _breastR = new HumanBoneInput(HumanoidPart.BreastR, _model, breastR);
+            _pelvis = new HumanBoneInput(BodyPart.Pelvis, _model, pelvis);
+            _upperNeck = new HumanBoneInput(BodyPart.Neck, _model, neckUpper);
+            _head = new HumanBoneInput(BodyPart.Head, _model, head);
+            if (breastL != null) _breastL = new HumanBoneInput(BodyPart.BreastL, _model, breastL);
+            if (breastR != null) _breastR = new HumanBoneInput(BodyPart.BreastR, _model, breastR);
 
             _bones = d;
         }

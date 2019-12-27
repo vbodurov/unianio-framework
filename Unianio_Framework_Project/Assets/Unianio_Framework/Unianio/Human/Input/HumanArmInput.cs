@@ -5,7 +5,7 @@ namespace Unianio.Human.Input
 {
     public class HumanArmInput
     {
-        public HumanArmInput(HumanoidPart part, Transform model,
+        public HumanArmInput(BodyPart part, Transform model, Transform armRoot,
             Transform collar, Transform shoulder, Transform shoulder_2, 
             Transform shoulderTwist, Transform forearm, 
             Transform forearmTwist, Transform hand,
@@ -17,6 +17,7 @@ namespace Unianio.Human.Input
         {
             Part = part;
             Model = model;
+            ArmRoot = armRoot;
             Collar = collar;
             Shoulder = shoulder;
             Shoulder2 = shoulder_2;
@@ -44,8 +45,8 @@ namespace Unianio.Human.Input
             Thumb2 = thumb2;
             Thumb3 = thumb3;
         }
-        public readonly HumanoidPart Part;
-        public readonly Transform Model, Collar, Shoulder, Shoulder2, 
+        public readonly BodyPart Part;
+        public readonly Transform Model, ArmRoot, Collar, Shoulder, Shoulder2, 
             ShoulderTwist, Forearm, ForearmTwist, Hand,
             Index0, Index1, Index2, Index3,
             Middle0, Middle1, Middle2, Middle3,

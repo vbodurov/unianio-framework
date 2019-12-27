@@ -1,7 +1,7 @@
 ﻿using System; using Unianio.Extensions;
-using Unianio.Graphs;
 using Unianio.Human;
 using Unianio.IK;
+using Unianio.Moves;
 using UnityEngine;
 using static Unianio.Static.fun;
 
@@ -12,17 +12,17 @@ namespace Unianio.MakeHuman
         readonly IComplexHuman _human;
         readonly HumanFaceConfig _config;
 
-        HandlePath _pathJaw, _pathEyeL, _pathEyeR, _pathEyelidUpL, _pathEyelidDnL,
-            _pathEyelidUpR, _pathEyelidDnR, _pathSpecial04, _pathOris04L, _pathOris03L,
-            _pathOris04R, _pathOris03R, _pathOris01, _pathOris02, _pathSpecial01, _pathOris05,
-            _pathOris06, _pathOris06L, _pathOris07L, _pathOris06R, _pathOris07R, _pathLevator02L,
-            _pathLevator03L, _pathLevator04L, _pathLevator05L, _pathLevator02R, _pathLevator03R,
-            _pathLevator04R, _pathLevator05R, _pathTemporalis02L, _pathRisorius02L, _pathRisorius03L,
-            _pathTemporalis02R, _pathRisorius02R, _pathRisorius03R, _pathTemporalis01R, _pathOculi02R,
-            _pathOculi01R, _pathTemporalis01L, _pathOculi02L, _pathOculi01L;
+        Mover<HumBoneHandler> _moveJaw, _moveEyeL, _moveEyeR, _moveEyelidUpL, _moveEyelidDnL,
+            _moveEyelidUpR, _moveEyelidDnR, _moveSpecial04, _moveOris04L, _moveOris03L,
+            _moveOris04R, _moveOris03R, _moveOris01, _moveOris02, _moveSpecial01, _moveOris05,
+            _moveOris06, _moveOris06L, _moveOris07L, _moveOris06R, _moveOris07R, _moveLevator02L,
+            _moveLevator03L, _moveLevator04L, _moveLevator05L, _moveLevator02R, _moveLevator03R,
+            _moveLevator04R, _moveLevator05R, _moveTemporalis02L, _moveRisorius02L, _moveRisorius03L,
+            _moveTemporalis02R, _moveRisorius02R, _moveRisorius03R, _moveTemporalis01R, _moveOculi02R,
+            _moveOculi01R, _moveTemporalis01L, _moveOculi02L, _moveOculi01L;
         float _blinkUpL, _blinkUpR, _blinkDnL, _blinkDnR, _eyeCurveShift;
-        readonly NumericPath _pathBlink, _pathBlinkUpL, _pathBlinkUpR, _pathBlinkDnL, _pathBlinkDnR, _pathEyeCurveShift;
-        (HandlePath path, Func<bool> condition, HumBoneHandler bone)[] _allBones;
+        readonly NumericMover _moveBlink, _moveBlinkUpL, _moveBlinkUpR, _moveBlinkDnL, _moveBlinkDnR, _moveEyeCurveShift;
+        (IExecutorOfProgress path, Func<bool> condition, HumBoneHandler bone)[] _allBones;
 
         public MHFaceGroup(IComplexHuman human, HumanFaceConfigSource configSource)
         {
@@ -81,71 +81,71 @@ namespace Unianio.MakeHuman
             Oculi02L = new HumBoneHandler(Model, face.Oculi02L);
             Oculi01L = new HumBoneHandler(Model, face.Oculi01L);
 
-            _pathBlink =
-                new NumericPath(n => Blink01 = n, () => Blink01)
+            _moveBlink =
+                new NumericMover(n => Blink01 = n, () => Blink01)
                 ;
-            _pathBlinkUpL =
-                new NumericPath(n => BlinkUpL01 = n, () => BlinkUpL01)
+            _moveBlinkUpL =
+                new NumericMover(n => BlinkUpL01 = n, () => BlinkUpL01)
                 ;
-            _pathBlinkUpR =
-                new NumericPath(n => BlinkUpR01 = n, () => BlinkUpR01)
+            _moveBlinkUpR =
+                new NumericMover(n => BlinkUpR01 = n, () => BlinkUpR01)
                 ;
-            _pathBlinkDnL =
-                new NumericPath(n => BlinkDnL01 = n, () => BlinkDnL01)
+            _moveBlinkDnL =
+                new NumericMover(n => BlinkDnL01 = n, () => BlinkDnL01)
                 ;
-            _pathBlinkDnR =
-                new NumericPath(n => BlinkDnR01 = n, () => BlinkDnR01)
+            _moveBlinkDnR =
+                new NumericMover(n => BlinkDnR01 = n, () => BlinkDnR01)
                 ;
-            _pathEyeCurveShift =
-                new NumericPath(n => EyeCurveShiftM11 = n, () => EyeCurveShiftM11)
+            _moveEyeCurveShift =
+                new NumericMover(n => EyeCurveShiftM11 = n, () => EyeCurveShiftM11)
                 ;
 
             _allBones = new[]
             {
-                (path: PathJaw, condition: () => h.AniJaw.IsNotRunning(), bone: Jaw),
-                (path: PathEyeL, condition: (Func<bool>)null, bone: EyeL),
-                (path: PathEyeR, condition: (Func<bool>)null, bone: EyeR),
-                (path: PathEyelidUpL, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidUpL),
-                (path: PathEyelidDnL, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidDnL),
-                (path: PathEyelidUpR, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidUpR),
-                (path: PathEyelidDnR, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidDnR),
-                (path: PathSpecial04, condition: (Func<bool>)null, bone: Special04),
-                (path: PathOris04L, condition: (Func<bool>)null, bone: Oris04L),
-                (path: PathOris03L, condition: (Func<bool>)null, bone: Oris03L),
-                (path: PathOris04R, condition: (Func<bool>)null, bone: Oris04R),
-                (path: PathOris03R, condition: (Func<bool>)null, bone: Oris03R),
-                (path: PathOris01, condition: (Func<bool>)null, bone: Oris01),
-                (path: PathOris02, condition: (Func<bool>)null, bone: Oris02),
-                (path: PathSpecial01, condition: (Func<bool>)null, bone: Special01),
-                (path: PathOris05, condition: (Func<bool>)null, bone: Oris05),
-                (path: PathOris06, condition: (Func<bool>)null, bone: Oris06),
-                (path: PathOris06L, condition: (Func<bool>)null, bone: Oris06L),
-                (path: PathOris07L, condition: (Func<bool>)null, bone: Oris07L),
-                (path: PathOris06R, condition: (Func<bool>)null, bone: Oris06R),
-                (path: PathOris07R, condition: (Func<bool>)null, bone: Oris07R),
-                (path: PathLevator02L, condition: (Func<bool>)null, bone: Levator02L),
-                (path: PathLevator03L, condition: (Func<bool>)null, bone: Levator03L),
-                (path: PathLevator04L, condition: (Func<bool>)null, bone: Levator04L),
-                (path: PathLevator05L, condition: (Func<bool>)null, bone: Levator05L),
-                (path: PathLevator02R, condition: (Func<bool>)null, bone: Levator02R),
-                (path: PathLevator03R, condition: (Func<bool>)null, bone: Levator03R),
-                (path: PathLevator04R, condition: (Func<bool>)null, bone: Levator04R),
-                (path: PathLevator05R, condition: (Func<bool>)null, bone: Levator05R),
-                (path: PathTemporalis02L, condition: (Func<bool>)null, bone: Temporalis02L),
-                (path: PathRisorius02L, condition: (Func<bool>)null, bone: Risorius02L),
-                (path: PathRisorius03L, condition: (Func<bool>)null, bone: Risorius03L),
-                (path: PathTemporalis02R, condition: (Func<bool>)null, bone: Temporalis02R),
-                (path: PathRisorius02R, condition: (Func<bool>)null, bone: Risorius02R),
-                (path: PathRisorius03R, condition: (Func<bool>)null, bone: Risorius03R),
-                (path: PathTemporalis01R, condition: (Func<bool>)null, bone: Temporalis01R),
-                (path: PathOculi02R, condition: (Func<bool>)null, bone: Oculi02R),
-                (path: PathOculi01R, condition: (Func<bool>)null, bone: Oculi01R),
-                (path: PathTemporalis01L, condition: (Func<bool>)null, bone: Temporalis01L),
-                (path: PathOculi02L, condition: (Func<bool>)null, bone: Oculi02L),
-                (path: PathOculi01L, condition: (Func<bool>)null, bone: Oculi01L),
+                (path: (IExecutorOfProgress)MoveJaw, condition: () => h.AniJaw.IsNotRunning(), bone: Jaw),
+                (path: (IExecutorOfProgress)MoveEyeL, condition: (Func<bool>)null, bone: EyeL),
+                (path: MoveEyeR, condition: (Func<bool>)null, bone: EyeR),
+                (path: MoveEyelidUpL, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidUpL),
+                (path: MoveEyelidDnL, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidDnL),
+                (path: MoveEyelidUpR, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidUpR),
+                (path: MoveEyelidDnR, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidDnR),
+                (path: MoveSpecial04, condition: (Func<bool>)null, bone: Special04),
+                (path: MoveOris04L, condition: (Func<bool>)null, bone: Oris04L),
+                (path: MoveOris03L, condition: (Func<bool>)null, bone: Oris03L),
+                (path: MoveOris04R, condition: (Func<bool>)null, bone: Oris04R),
+                (path: MoveOris03R, condition: (Func<bool>)null, bone: Oris03R),
+                (path: MoveOris01, condition: (Func<bool>)null, bone: Oris01),
+                (path: MoveOris02, condition: (Func<bool>)null, bone: Oris02),
+                (path: MoveSpecial01, condition: (Func<bool>)null, bone: Special01),
+                (path: MoveOris05, condition: (Func<bool>)null, bone: Oris05),
+                (path: MoveOris06, condition: (Func<bool>)null, bone: Oris06),
+                (path: MoveOris06L, condition: (Func<bool>)null, bone: Oris06L),
+                (path: MoveOris07L, condition: (Func<bool>)null, bone: Oris07L),
+                (path: MoveOris06R, condition: (Func<bool>)null, bone: Oris06R),
+                (path: MoveOris07R, condition: (Func<bool>)null, bone: Oris07R),
+                (path: MoveLevator02L, condition: (Func<bool>)null, bone: Levator02L),
+                (path: MoveLevator03L, condition: (Func<bool>)null, bone: Levator03L),
+                (path: MoveLevator04L, condition: (Func<bool>)null, bone: Levator04L),
+                (path: MoveLevator05L, condition: (Func<bool>)null, bone: Levator05L),
+                (path: MoveLevator02R, condition: (Func<bool>)null, bone: Levator02R),
+                (path: MoveLevator03R, condition: (Func<bool>)null, bone: Levator03R),
+                (path: MoveLevator04R, condition: (Func<bool>)null, bone: Levator04R),
+                (path: MoveLevator05R, condition: (Func<bool>)null, bone: Levator05R),
+                (path: MoveTemporalis02L, condition: (Func<bool>)null, bone: Temporalis02L),
+                (path: MoveRisorius02L, condition: (Func<bool>)null, bone: Risorius02L),
+                (path: MoveRisorius03L, condition: (Func<bool>)null, bone: Risorius03L),
+                (path: MoveTemporalis02R, condition: (Func<bool>)null, bone: Temporalis02R),
+                (path: MoveRisorius02R, condition: (Func<bool>)null, bone: Risorius02R),
+                (path: MoveRisorius03R, condition: (Func<bool>)null, bone: Risorius03R),
+                (path: MoveTemporalis01R, condition: (Func<bool>)null, bone: Temporalis01R),
+                (path: MoveOculi02R, condition: (Func<bool>)null, bone: Oculi02R),
+                (path: MoveOculi01R, condition: (Func<bool>)null, bone: Oculi01R),
+                (path: MoveTemporalis01L, condition: (Func<bool>)null, bone: Temporalis01L),
+                (path: MoveOculi02L, condition: (Func<bool>)null, bone: Oculi02L),
+                (path: MoveOculi01L, condition: (Func<bool>)null, bone: Oculi01L),
             };
         }
-        public (HandlePath path, Func<bool> condition, HumBoneHandler bone)[] AllBones => _allBones;
+        public (IExecutorOfProgress path, Func<bool> condition, HumBoneHandler bone)[] AllBones => _allBones;
         public Transform Model { get; }
         public HumBoneHandler Jaw { get; }
         public HumBoneHandler EyeL { get; }
@@ -189,53 +189,53 @@ namespace Unianio.MakeHuman
         public HumBoneHandler Oculi02L { get; }
         public HumBoneHandler Oculi01L { get; }
 
-        public HandlePath PathJaw => _pathJaw ?? (_pathJaw = new HandlePath(Jaw));
-        public HandlePath PathEyeL => _pathEyeL ?? (_pathEyeL = new HandlePath(EyeL));
-        public HandlePath PathEyeR => _pathEyeR ?? (_pathEyeR = new HandlePath(EyeR));
-        public HandlePath PathEyelidUpL => _pathEyelidUpL ?? (_pathEyelidUpL = new HandlePath(EyelidUpL));
-        public HandlePath PathEyelidDnL => _pathEyelidDnL ?? (_pathEyelidDnL = new HandlePath(EyelidDnL));
-        public HandlePath PathEyelidUpR => _pathEyelidUpR ?? (_pathEyelidUpR = new HandlePath(EyelidUpR));
-        public HandlePath PathEyelidDnR => _pathEyelidDnR ?? (_pathEyelidDnR = new HandlePath(EyelidDnR));
-        public HandlePath PathSpecial04 => _pathSpecial04 ?? (_pathSpecial04 = new HandlePath(Special04));
-        public HandlePath PathOris04L => _pathOris04L ?? (_pathOris04L = new HandlePath(Oris04L));
-        public HandlePath PathOris03L => _pathOris03L ?? (_pathOris03L = new HandlePath(Oris03L));
-        public HandlePath PathOris04R => _pathOris04R ?? (_pathOris04R = new HandlePath(Oris04R));
-        public HandlePath PathOris03R => _pathOris03R ?? (_pathOris03R = new HandlePath(Oris03R));
-        public HandlePath PathOris01 => _pathOris01 ?? (_pathOris01 = new HandlePath(Oris01));
-        public HandlePath PathOris02 => _pathOris02 ?? (_pathOris02 = new HandlePath(Oris02));
-        public HandlePath PathSpecial01 => _pathSpecial01 ?? (_pathSpecial01 = new HandlePath(Special01));
-        public HandlePath PathOris05 => _pathOris05 ?? (_pathOris05 = new HandlePath(Oris05));
-        public HandlePath PathOris06 => _pathOris06 ?? (_pathOris06 = new HandlePath(Oris06));
-        public HandlePath PathOris06L => _pathOris06L ?? (_pathOris06L = new HandlePath(Oris06L));
-        public HandlePath PathOris07L => _pathOris07L ?? (_pathOris07L = new HandlePath(Oris07L));
-        public HandlePath PathOris06R => _pathOris06R ?? (_pathOris06R = new HandlePath(Oris06R));
-        public HandlePath PathOris07R => _pathOris07R ?? (_pathOris07R = new HandlePath(Oris07R));
-        public HandlePath PathLevator02L => _pathLevator02L ?? (_pathLevator02L = new HandlePath(Levator02L));
-        public HandlePath PathLevator03L => _pathLevator03L ?? (_pathLevator03L = new HandlePath(Levator03L));
-        public HandlePath PathLevator04L => _pathLevator04L ?? (_pathLevator04L = new HandlePath(Levator04L));
-        public HandlePath PathLevator05L => _pathLevator05L ?? (_pathLevator05L = new HandlePath(Levator05L));
-        public HandlePath PathLevator02R => _pathLevator02R ?? (_pathLevator02R = new HandlePath(Levator02R));
-        public HandlePath PathLevator03R => _pathLevator03R ?? (_pathLevator03R = new HandlePath(Levator03R));
-        public HandlePath PathLevator04R => _pathLevator04R ?? (_pathLevator04R = new HandlePath(Levator04R));
-        public HandlePath PathLevator05R => _pathLevator05R ?? (_pathLevator05R = new HandlePath(Levator05R));
-        public HandlePath PathTemporalis02L => _pathTemporalis02L ?? (_pathTemporalis02L = new HandlePath(Temporalis02L));
-        public HandlePath PathRisorius02L => _pathRisorius02L ?? (_pathRisorius02L = new HandlePath(Risorius02L));
-        public HandlePath PathRisorius03L => _pathRisorius03L ?? (_pathRisorius03L = new HandlePath(Risorius03L));
-        public HandlePath PathTemporalis02R => _pathTemporalis02R ?? (_pathTemporalis02R = new HandlePath(Temporalis02R));
-        public HandlePath PathRisorius02R => _pathRisorius02R ?? (_pathRisorius02R = new HandlePath(Risorius02R));
-        public HandlePath PathRisorius03R => _pathRisorius03R ?? (_pathRisorius03R = new HandlePath(Risorius03R));
-        public HandlePath PathTemporalis01R => _pathTemporalis01R ?? (_pathTemporalis01R = new HandlePath(Temporalis01R));
-        public HandlePath PathOculi02R => _pathOculi02R ?? (_pathOculi02R = new HandlePath(Oculi02R));
-        public HandlePath PathOculi01R => _pathOculi01R ?? (_pathOculi01R = new HandlePath(Oculi01R));
-        public HandlePath PathTemporalis01L => _pathTemporalis01L ?? (_pathTemporalis01L = new HandlePath(Temporalis01L));
-        public HandlePath PathOculi02L => _pathOculi02L ?? (_pathOculi02L = new HandlePath(Oculi02L));
-        public HandlePath PathOculi01L => _pathOculi01L ?? (_pathOculi01L = new HandlePath(Oculi01L));
-        public NumericPath PathEyeCurveShift => _pathEyeCurveShift;
-        public NumericPath PathBlink => _pathBlink;
-        public NumericPath PathBlinkUpL => _pathBlinkUpL;
-        public NumericPath PathBlinkUpR => _pathBlinkUpR;
-        public NumericPath PathBlinkDnL => _pathBlinkDnL;
-        public NumericPath PathBlinkDnR => _pathBlinkDnR;
+        public Mover<HumBoneHandler> MoveJaw => _moveJaw ?? (_moveJaw = new Mover<HumBoneHandler>(Jaw));
+        public Mover<HumBoneHandler> MoveEyeL => _moveEyeL ?? (_moveEyeL = new Mover<HumBoneHandler>(EyeL));
+        public Mover<HumBoneHandler> MoveEyeR => _moveEyeR ?? (_moveEyeR = new Mover<HumBoneHandler>(EyeR));
+        public Mover<HumBoneHandler> MoveEyelidUpL => _moveEyelidUpL ?? (_moveEyelidUpL = new Mover<HumBoneHandler>(EyelidUpL));
+        public Mover<HumBoneHandler> MoveEyelidDnL => _moveEyelidDnL ?? (_moveEyelidDnL = new Mover<HumBoneHandler>(EyelidDnL));
+        public Mover<HumBoneHandler> MoveEyelidUpR => _moveEyelidUpR ?? (_moveEyelidUpR = new Mover<HumBoneHandler>(EyelidUpR));
+        public Mover<HumBoneHandler> MoveEyelidDnR => _moveEyelidDnR ?? (_moveEyelidDnR = new Mover<HumBoneHandler>(EyelidDnR));
+        public Mover<HumBoneHandler> MoveSpecial04 => _moveSpecial04 ?? (_moveSpecial04 = new Mover<HumBoneHandler>(Special04));
+        public Mover<HumBoneHandler> MoveOris04L => _moveOris04L ?? (_moveOris04L = new Mover<HumBoneHandler>(Oris04L));
+        public Mover<HumBoneHandler> MoveOris03L => _moveOris03L ?? (_moveOris03L = new Mover<HumBoneHandler>(Oris03L));
+        public Mover<HumBoneHandler> MoveOris04R => _moveOris04R ?? (_moveOris04R = new Mover<HumBoneHandler>(Oris04R));
+        public Mover<HumBoneHandler> MoveOris03R => _moveOris03R ?? (_moveOris03R = new Mover<HumBoneHandler>(Oris03R));
+        public Mover<HumBoneHandler> MoveOris01 => _moveOris01 ?? (_moveOris01 = new Mover<HumBoneHandler>(Oris01));
+        public Mover<HumBoneHandler> MoveOris02 => _moveOris02 ?? (_moveOris02 = new Mover<HumBoneHandler>(Oris02));
+        public Mover<HumBoneHandler> MoveSpecial01 => _moveSpecial01 ?? (_moveSpecial01 = new Mover<HumBoneHandler>(Special01));
+        public Mover<HumBoneHandler> MoveOris05 => _moveOris05 ?? (_moveOris05 = new Mover<HumBoneHandler>(Oris05));
+        public Mover<HumBoneHandler> MoveOris06 => _moveOris06 ?? (_moveOris06 = new Mover<HumBoneHandler>(Oris06));
+        public Mover<HumBoneHandler> MoveOris06L => _moveOris06L ?? (_moveOris06L = new Mover<HumBoneHandler>(Oris06L));
+        public Mover<HumBoneHandler> MoveOris07L => _moveOris07L ?? (_moveOris07L = new Mover<HumBoneHandler>(Oris07L));
+        public Mover<HumBoneHandler> MoveOris06R => _moveOris06R ?? (_moveOris06R = new Mover<HumBoneHandler>(Oris06R));
+        public Mover<HumBoneHandler> MoveOris07R => _moveOris07R ?? (_moveOris07R = new Mover<HumBoneHandler>(Oris07R));
+        public Mover<HumBoneHandler> MoveLevator02L => _moveLevator02L ?? (_moveLevator02L = new Mover<HumBoneHandler>(Levator02L));
+        public Mover<HumBoneHandler> MoveLevator03L => _moveLevator03L ?? (_moveLevator03L = new Mover<HumBoneHandler>(Levator03L));
+        public Mover<HumBoneHandler> MoveLevator04L => _moveLevator04L ?? (_moveLevator04L = new Mover<HumBoneHandler>(Levator04L));
+        public Mover<HumBoneHandler> MoveLevator05L => _moveLevator05L ?? (_moveLevator05L = new Mover<HumBoneHandler>(Levator05L));
+        public Mover<HumBoneHandler> MoveLevator02R => _moveLevator02R ?? (_moveLevator02R = new Mover<HumBoneHandler>(Levator02R));
+        public Mover<HumBoneHandler> MoveLevator03R => _moveLevator03R ?? (_moveLevator03R = new Mover<HumBoneHandler>(Levator03R));
+        public Mover<HumBoneHandler> MoveLevator04R => _moveLevator04R ?? (_moveLevator04R = new Mover<HumBoneHandler>(Levator04R));
+        public Mover<HumBoneHandler> MoveLevator05R => _moveLevator05R ?? (_moveLevator05R = new Mover<HumBoneHandler>(Levator05R));
+        public Mover<HumBoneHandler> MoveTemporalis02L => _moveTemporalis02L ?? (_moveTemporalis02L = new Mover<HumBoneHandler>(Temporalis02L));
+        public Mover<HumBoneHandler> MoveRisorius02L => _moveRisorius02L ?? (_moveRisorius02L = new Mover<HumBoneHandler>(Risorius02L));
+        public Mover<HumBoneHandler> MoveRisorius03L => _moveRisorius03L ?? (_moveRisorius03L = new Mover<HumBoneHandler>(Risorius03L));
+        public Mover<HumBoneHandler> MoveTemporalis02R => _moveTemporalis02R ?? (_moveTemporalis02R = new Mover<HumBoneHandler>(Temporalis02R));
+        public Mover<HumBoneHandler> MoveRisorius02R => _moveRisorius02R ?? (_moveRisorius02R = new Mover<HumBoneHandler>(Risorius02R));
+        public Mover<HumBoneHandler> MoveRisorius03R => _moveRisorius03R ?? (_moveRisorius03R = new Mover<HumBoneHandler>(Risorius03R));
+        public Mover<HumBoneHandler> MoveTemporalis01R => _moveTemporalis01R ?? (_moveTemporalis01R = new Mover<HumBoneHandler>(Temporalis01R));
+        public Mover<HumBoneHandler> MoveOculi02R => _moveOculi02R ?? (_moveOculi02R = new Mover<HumBoneHandler>(Oculi02R));
+        public Mover<HumBoneHandler> MoveOculi01R => _moveOculi01R ?? (_moveOculi01R = new Mover<HumBoneHandler>(Oculi01R));
+        public Mover<HumBoneHandler> MoveTemporalis01L => _moveTemporalis01L ?? (_moveTemporalis01L = new Mover<HumBoneHandler>(Temporalis01L));
+        public Mover<HumBoneHandler> MoveOculi02L => _moveOculi02L ?? (_moveOculi02L = new Mover<HumBoneHandler>(Oculi02L));
+        public Mover<HumBoneHandler> MoveOculi01L => _moveOculi01L ?? (_moveOculi01L = new Mover<HumBoneHandler>(Oculi01L));
+        public NumericMover MoveEyeCurveShift => _moveEyeCurveShift;
+        public NumericMover MoveBlink => _moveBlink;
+        public NumericMover MoveBlinkUpL => _moveBlinkUpL;
+        public NumericMover MoveBlinkUpR => _moveBlinkUpR;
+        public NumericMover MoveBlinkDnL => _moveBlinkDnL;
+        public NumericMover MoveBlinkDnR => _moveBlinkDnR;
         /// <summary>
         /// 1 = ark up like in smile
         /// 0 = normal

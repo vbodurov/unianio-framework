@@ -37,7 +37,7 @@ namespace Unianio.IK
             _human = human;
             _pectoral = pectoral;
             _nipple = nipple;
-            Part = side == BodySide.LT ? HumanoidPart.BreastL : HumanoidPart.BreastR;
+            Part = side == BodySide.LT ? BodyPart.BreastL : BodyPart.BreastR;
             _iniBreastLocFw = _pectoral.forward.AsLocalDir(_pectoral.parent);
             _iniBreastLocUp = _pectoral.up.AsLocalDir(_pectoral.parent);
             _iniWorldUpAsLocal = v3.up.AsLocalDir(_pectoral.parent);
@@ -82,7 +82,7 @@ namespace Unianio.IK
                 _jiggle.Pendulum.CancelInertia();
             }, this);
         }
-        public HumanoidPart Part { get; }
+        public BodyPart Part { get; }
         public HumBoneHandler Nipple => _nipple;
         public Transform Pectoral => _pectoral;
         public void SetTimeProvider(IPausableTimeProvider pausableTime)

@@ -1,6 +1,7 @@
 ﻿using System;
 using Unianio.Extensions;
 using Unianio.Human;
+using Unianio.Moves;
 using Unianio.Rigged;
 using Unianio.Static;
 using UnityEngine;
@@ -26,10 +27,31 @@ namespace Unianio.IK
         public Vector3 IniModelPos { get; }
         public Quaternion IniLocalRot { get; }
         public Quaternion IniModelRot { get; }
+        public Vector3 IniLocalSca => v3.one;
         public Vector3 IniLocalFw => IniLocalRot * Vector3.forward;
         public Vector3 IniLocalUp => IniLocalRot * Vector3.up;
         public Vector3 IniModelFw => IniModelRot * Vector3.forward;
         public Vector3 IniModelUp => IniModelRot * Vector3.up;
+        public IExecutorOfProgress ToInitialLocalPosition()
+        {
+            return new Mover<HumSpineChain>(this).New().Local.LineTo(b => b.IniLocalPos);
+        }
+        public IExecutorOfProgress ToInitialLocalRotation()
+        {
+            return new Mover<HumSpineChain>(this).New().Local.RotateTo(b => b.IniLocalRot);
+        }
+        public IExecutorOfProgress ToInitialLocalScale()
+        {
+            return new Mover<HumSpineChain>(this).New().Local.ScaleTo(b => b.IniLocalSca);
+        }
+        public IExecutorOfProgress ToInitialLocal()
+        {
+            return new Mover<HumSpineChain>(this).New().Local
+                    .LineTo(b => b.IniLocalPos)
+                    .RotateTo(b => b.IniLocalRot)
+                    .ScaleTo(b => b.IniLocalSca)
+                ;
+        }
 
         public readonly HumBoneHandler NeckLowerHandler;
 
@@ -55,7 +77,7 @@ namespace Unianio.IK
         }
         public float DefaultDistRootToNeck => _defaultDistRootToNeck;
         public Transform[] AllNodes => _allNodes;
-        public HumSpineChain(IComplexHumanDefinition definition) : base(HumanoidPart.Spine)
+        public HumSpineChain(IComplexHumanDefinition definition) : base(BodyPart.Spine)
         {
             _definition = definition;
             var spine = _definition.Spine;
@@ -73,8 +95,8 @@ namespace Unianio.IK
 
             _locRootUp = Root.DirTo(AbdomenLower).GetRealUp(-_model.forward).AsLocalDir(Root);
             _locRootFw = Root.DirTo(AbdomenLower).AsLocalDir(Root);
-            _handle = CreateHandle(Root, HumanoidPart.Spine, false, NeckLower.position, modelFw, modelUp);
-            NeckLowerHandler = new HumBoneHandler(HumanoidPart.Neck, _model, NeckLower);
+            _handle = CreateHandle(Root, BodyPart.Spine, false, NeckLower.position, modelFw, modelUp);
+            NeckLowerHandler = new HumBoneHandler(BodyPart.Neck, _model, NeckLower);
 
             _handle.position = NeckLower.position;
             _handle.rotation = NeckLower.rotation;

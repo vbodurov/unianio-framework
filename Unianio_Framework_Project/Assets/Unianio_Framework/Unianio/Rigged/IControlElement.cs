@@ -4,7 +4,7 @@ namespace Unianio.Rigged
 {
     public interface IControlElement
     {
-        HumanoidPart Part { get; }
+        BodyPart Part { get; }
         Transform Handle { get; }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using System;
 using Unianio.Enums;
 using Unianio.Extensions;
-using Unianio.Graphs;
 using Unianio.Human;
 using Unianio.IK;
+using Unianio.Moves;
 using Unianio.Rigged;
 using UnityEngine;
 using static Unianio.Static.fun;
@@ -15,29 +15,29 @@ namespace Unianio.Genesis.IK
         readonly IComplexHuman _human;
         readonly HumanFaceConfig _config;
 
-        HandlePath _pathLowerFaceRig, _pathUpperFaceRig,
-            _pathJaw,
+        Mover<HumBoneHandler> _moveLowerFaceRig, _moveUpperFaceRig,
+            _moveJaw,
             // inner circle around the mouth:
-            _pathLipCornerL, _pathLipLowerOuterL, _pathLipLowerInnerL, _pathLipLowerMiddle, _pathLipLowerInnerR, _pathLipLowerOuterR, _pathLipCornerR,
-            _pathLipUpperOuterL, _pathLipUpperInnerL, _pathLipUpperMiddle, _pathLipUpperInnerR, _pathLipUpperOuterR,
+            _moveLipCornerL, _moveLipLowerOuterL, _moveLipLowerInnerL, _moveLipLowerMiddle, _moveLipLowerInnerR, _moveLipLowerOuterR, _moveLipCornerR,
+            _moveLipUpperOuterL, _moveLipUpperInnerL, _moveLipUpperMiddle, _moveLipUpperInnerR, _moveLipUpperOuterR,
             // eyes:
-            _pathEyeL, _pathEyeR,
+            _moveEyeL, _moveEyeR,
             // eyelids:
-            _pathEyelidUpperInnerL, _pathEyelidUpperL, _pathEyelidUpperOuterL, _pathEyelidLowerInnerL, _pathEyelidLowerL, _pathEyelidLowerOuterL,
-            _pathEyelidUpperInnerR, _pathEyelidUpperR, _pathEyelidUpperOuterR, _pathEyelidLowerInnerR, _pathEyelidLowerR, _pathEyelidLowerOuterR,
-            _pathEyelidInnerL, _pathEyelidOuterL, _pathEyelidInnerR, _pathEyelidOuterR,
+            _moveEyelidUpperInnerL, _moveEyelidUpperL, _moveEyelidUpperOuterL, _moveEyelidLowerInnerL, _moveEyelidLowerL, _moveEyelidLowerOuterL,
+            _moveEyelidUpperInnerR, _moveEyelidUpperR, _moveEyelidUpperOuterR, _moveEyelidLowerInnerR, _moveEyelidLowerR, _moveEyelidLowerOuterR,
+            _moveEyelidInnerL, _moveEyelidOuterL, _moveEyelidInnerR, _moveEyelidOuterR,
             // eyebrows:
-            _pathMidNoseBridge, _pathBrowOuterL, _pathBrowMidL, _pathBrowInnerL, _pathCenterBrow, _pathBrowInnerR, _pathBrowMidR, _pathBrowOuterR,
+            _moveMidNoseBridge, _moveBrowOuterL, _moveBrowMidL, _moveBrowInnerL, _moveCenterBrow, _moveBrowInnerR, _moveBrowMidR, _moveBrowOuterR,
             //  cheeks:
-            _pathCheekUpperL, _pathCheekLowerL, _pathCheekLowerR, _pathCheekUpperR, _pathNasolabialMouthCornerL, _pathNasolabialMouthCornerR,
-            _pathLipBelowNoseL, _pathLipNasolabialCreaseL, _pathNasolabialMiddleL, _pathNasolabialUpperL, _pathNostrilL, _pathSquintInnerL, 
-            _pathSquintOuterL, _pathJawClenchL, _pathNasolabialLowerL, 
-            _pathLipBelowNoseR, _pathLipNasolabialCreaseR, _pathNasolabialMiddleR, _pathNasolabialUpperR, _pathNostrilR, _pathSquintInnerR, 
-            _pathSquintOuterR, _pathJawClenchR, _pathNasolabialLowerR
+            _moveCheekUpperL, _moveCheekLowerL, _moveCheekLowerR, _moveCheekUpperR, _moveNasolabialMouthCornerL, _moveNasolabialMouthCornerR,
+            _moveLipBelowNoseL, _moveLipNasolabialCreaseL, _moveNasolabialMiddleL, _moveNasolabialUpperL, _moveNostrilL, _moveSquintInnerL, 
+            _moveSquintOuterL, _moveJawClenchL, _moveNasolabialLowerL, 
+            _moveLipBelowNoseR, _moveLipNasolabialCreaseR, _moveNasolabialMiddleR, _moveNasolabialUpperR, _moveNostrilR, _moveSquintInnerR, 
+            _moveSquintOuterR, _moveJawClenchR, _moveNasolabialLowerR
             ;
         float _blinkUpL, _blinkUpR, _blinkDnL, _blinkDnR, _eyeCurveShift;
-        readonly NumericPath _pathBlink, _pathBlinkUpL, _pathBlinkUpR, _pathBlinkDnL, _pathBlinkDnR;
-        (HandlePath path, Func<bool> condition, HumBoneHandler bone)[] _allBones;
+        readonly NumericMover _moveBlink, _moveBlinkUpL, _moveBlinkUpR, _moveBlinkDnL, _moveBlinkDnR;
+        (IExecutorOfProgress path, Func<bool> condition, HumBoneHandler bone)[] _allBones;
 
         public readonly HumBoneHandler LowerJaw;
 
@@ -135,88 +135,88 @@ namespace Unianio.Genesis.IK
             LipUpperInnerR = new HumBoneHandler(Model, face.LipUpperInnerR);
             LipUpperOuterR = new HumBoneHandler(Model, face.LipUpperOuterR);
 
-            _pathBlink =
-                new NumericPath(n => Blink01 = n, () => Blink01)
+            _moveBlink =
+                new NumericMover(n => Blink01 = n, () => Blink01)
                 ;
-            _pathBlinkUpL =
-                new NumericPath(n => BlinkUpL01 = n, () => BlinkUpL01)
+            _moveBlinkUpL =
+                new NumericMover(n => BlinkUpL01 = n, () => BlinkUpL01)
                 ;
-            _pathBlinkUpR =
-                new NumericPath(n => BlinkUpR01 = n, () => BlinkUpR01)
+            _moveBlinkUpR =
+                new NumericMover(n => BlinkUpR01 = n, () => BlinkUpR01)
                 ;
-            _pathBlinkDnL =
-                new NumericPath(n => BlinkDnL01 = n, () => BlinkDnL01)
+            _moveBlinkDnL =
+                new NumericMover(n => BlinkDnL01 = n, () => BlinkDnL01)
                 ;
-            _pathBlinkDnR =
-                new NumericPath(n => BlinkDnR01 = n, () => BlinkDnR01)
+            _moveBlinkDnR =
+                new NumericMover(n => BlinkDnR01 = n, () => BlinkDnR01)
                 ;
 
             Initial = new GenFaceGroupInitialStats(this);
 
             _allBones = new[]
            {
-                (path: PathLipCornerL, condition: (Func<bool>)null, bone: LipCornerL ),
-                (path: PathLipLowerOuterL, condition: (Func<bool>)null, bone: LipLowerOuterL ),
-                (path: PathLipLowerInnerL, condition: (Func<bool>)null, bone: LipLowerInnerL ),
-                (path: PathLipLowerMiddle, condition: (Func<bool>)null, bone: LipLowerMiddle ),
-                (path: PathLipLowerInnerR, condition: (Func<bool>)null, bone: LipLowerInnerR ),
-                (path: PathLipLowerOuterR, condition: (Func<bool>)null, bone: LipLowerOuterR ),
-                (path: PathLipCornerR, condition: (Func<bool>)null, bone: LipCornerR ),
-                (path: PathLipUpperOuterL, condition: (Func<bool>)null, bone: LipUpperOuterL ),
-                (path: PathLipUpperInnerL, condition: (Func<bool>)null, bone: LipUpperInnerL ),
-                (path: PathLipUpperMiddle, condition: (Func<bool>)null, bone: LipUpperMiddle ),
-                (path: PathLipUpperInnerR, condition: (Func<bool>)null, bone: LipUpperInnerR ),
-                (path: PathLipUpperOuterR, condition: (Func<bool>)null, bone: LipUpperOuterR ),
-                (path: PathEyelidUpperInnerL, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidUpperInnerL),
-                (path: PathEyelidUpperL, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidUpperL),
-                (path: PathEyelidUpperOuterL, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidUpperOuterL),
-                (path: PathEyelidLowerInnerL, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidLowerInnerL),
-                (path: PathEyelidLowerL, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidLowerL),
-                (path: PathEyelidLowerOuterL, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidLowerOuterL),
-                (path: PathEyelidUpperInnerR, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidUpperInnerR),
-                (path: PathEyelidUpperR, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidUpperR),
-                (path: PathEyelidUpperOuterR, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidUpperOuterR),
-                (path: PathEyelidLowerInnerR, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidLowerInnerR),
-                (path: PathEyelidLowerR, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidLowerR),
-                (path: PathEyelidLowerOuterR, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidLowerOuterR),
-                (path: PathLipBelowNoseR, condition: (Func<bool>)null, bone: LipBelowNoseR ),
-                (path: PathLipNasolabialCreaseR, condition: (Func<bool>)null, bone: LipNasolabialCreaseR ),
-                (path: PathNasolabialMiddleR, condition: (Func<bool>)null, bone: NasolabialMiddleR ),
-                (path: PathNasolabialUpperR, condition: (Func<bool>)null, bone: NasolabialUpperR ),
-                (path: PathNostrilR, condition: (Func<bool>)null, bone: NostrilR ),
-                (path: PathSquintInnerR, condition: (Func<bool>)null, bone: SquintInnerR ),
-                (path: PathSquintOuterR, condition: (Func<bool>)null, bone: SquintOuterR ),
-                (path: PathJawClenchR, condition: (Func<bool>)null, bone: JawClenchR ),
-                (path: PathNasolabialLowerR, condition: (Func<bool>)null, bone: NasolabialLowerR ),
-                (path: PathLipBelowNoseL, condition: (Func<bool>)null, bone: LipBelowNoseL ),
-                (path: PathLipNasolabialCreaseL, condition: (Func<bool>)null, bone: LipNasolabialCreaseL ),
-                (path: PathNasolabialMiddleL, condition: (Func<bool>)null, bone: NasolabialMiddleL ),
-                (path: PathNasolabialUpperL, condition: (Func<bool>)null, bone: NasolabialUpperL ),
-                (path: PathNostrilL, condition: (Func<bool>)null, bone: NostrilL ),
-                (path: PathSquintInnerL, condition: (Func<bool>)null, bone: SquintInnerL ),
-                (path: PathSquintOuterL, condition: (Func<bool>)null, bone: SquintOuterL ),
-                (path: PathJawClenchL, condition: (Func<bool>)null, bone: JawClenchL ),
-                (path: PathNasolabialLowerL, condition: (Func<bool>)null, bone: NasolabialLowerL ),
-                (path: PathNasolabialMouthCornerL, condition: (Func<bool>)null, bone: NasolabialMouthCornerL ),
-                (path: PathNasolabialMouthCornerR, condition: (Func<bool>)null, bone: NasolabialMouthCornerR ),
-                (path: PathCheekUpperL, condition: (Func<bool>)null, bone: CheekUpperL ),
-                (path: PathCheekUpperR, condition: (Func<bool>)null, bone: CheekUpperR ),
-                (path: PathBrowInnerL, condition: (Func<bool>)null, bone: BrowInnerL ),
-                (path: PathBrowInnerR, condition: (Func<bool>)null, bone: BrowInnerR ),
-                (path: PathBrowMidL, condition: (Func<bool>)null,bone:BrowMidL ),
-                (path: PathBrowMidR, condition: (Func<bool>)null, bone: BrowMidR ),
-                (path: PathBrowOuterL, condition: (Func<bool>)null, bone: BrowOuterL ),
-                (path: PathBrowOuterR, condition: (Func<bool>)null, bone: BrowOuterR ),
-                (path: PathCenterBrow, condition: (Func<bool>)null, bone: CenterBrow ),
-                (path: PathJaw, condition: () => h.AniJaw.IsNotRunning(), bone: LowerJaw ),
+                (path: (IExecutorOfProgress)MoveLipCornerL, condition: (Func<bool>)null, bone: LipCornerL ),
+                (path: MoveLipLowerOuterL, condition: (Func<bool>)null, bone: LipLowerOuterL ),
+                (path: MoveLipLowerInnerL, condition: (Func<bool>)null, bone: LipLowerInnerL ),
+                (path: MoveLipLowerMiddle, condition: (Func<bool>)null, bone: LipLowerMiddle ),
+                (path: MoveLipLowerInnerR, condition: (Func<bool>)null, bone: LipLowerInnerR ),
+                (path: MoveLipLowerOuterR, condition: (Func<bool>)null, bone: LipLowerOuterR ),
+                (path: MoveLipCornerR, condition: (Func<bool>)null, bone: LipCornerR ),
+                (path: MoveLipUpperOuterL, condition: (Func<bool>)null, bone: LipUpperOuterL ),
+                (path: MoveLipUpperInnerL, condition: (Func<bool>)null, bone: LipUpperInnerL ),
+                (path: MoveLipUpperMiddle, condition: (Func<bool>)null, bone: LipUpperMiddle ),
+                (path: MoveLipUpperInnerR, condition: (Func<bool>)null, bone: LipUpperInnerR ),
+                (path: MoveLipUpperOuterR, condition: (Func<bool>)null, bone: LipUpperOuterR ),
+                (path: MoveEyelidUpperInnerL, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidUpperInnerL),
+                (path: MoveEyelidUpperL, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidUpperL),
+                (path: MoveEyelidUpperOuterL, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidUpperOuterL),
+                (path: MoveEyelidLowerInnerL, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidLowerInnerL),
+                (path: MoveEyelidLowerL, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidLowerL),
+                (path: MoveEyelidLowerOuterL, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidLowerOuterL),
+                (path: MoveEyelidUpperInnerR, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidUpperInnerR),
+                (path: MoveEyelidUpperR, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidUpperR),
+                (path: MoveEyelidUpperOuterR, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidUpperOuterR),
+                (path: MoveEyelidLowerInnerR, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidLowerInnerR),
+                (path: MoveEyelidLowerR, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidLowerR),
+                (path: MoveEyelidLowerOuterR, condition: () => h.AniBlink.IsNotRunning(), bone: EyelidLowerOuterR),
+                (path: MoveLipBelowNoseR, condition: (Func<bool>)null, bone: LipBelowNoseR ),
+                (path: MoveLipNasolabialCreaseR, condition: (Func<bool>)null, bone: LipNasolabialCreaseR ),
+                (path: MoveNasolabialMiddleR, condition: (Func<bool>)null, bone: NasolabialMiddleR ),
+                (path: MoveNasolabialUpperR, condition: (Func<bool>)null, bone: NasolabialUpperR ),
+                (path: MoveNostrilR, condition: (Func<bool>)null, bone: NostrilR ),
+                (path: MoveSquintInnerR, condition: (Func<bool>)null, bone: SquintInnerR ),
+                (path: MoveSquintOuterR, condition: (Func<bool>)null, bone: SquintOuterR ),
+                (path: MoveJawClenchR, condition: (Func<bool>)null, bone: JawClenchR ),
+                (path: MoveNasolabialLowerR, condition: (Func<bool>)null, bone: NasolabialLowerR ),
+                (path: MoveLipBelowNoseL, condition: (Func<bool>)null, bone: LipBelowNoseL ),
+                (path: MoveLipNasolabialCreaseL, condition: (Func<bool>)null, bone: LipNasolabialCreaseL ),
+                (path: MoveNasolabialMiddleL, condition: (Func<bool>)null, bone: NasolabialMiddleL ),
+                (path: MoveNasolabialUpperL, condition: (Func<bool>)null, bone: NasolabialUpperL ),
+                (path: MoveNostrilL, condition: (Func<bool>)null, bone: NostrilL ),
+                (path: MoveSquintInnerL, condition: (Func<bool>)null, bone: SquintInnerL ),
+                (path: MoveSquintOuterL, condition: (Func<bool>)null, bone: SquintOuterL ),
+                (path: MoveJawClenchL, condition: (Func<bool>)null, bone: JawClenchL ),
+                (path: MoveNasolabialLowerL, condition: (Func<bool>)null, bone: NasolabialLowerL ),
+                (path: MoveNasolabialMouthCornerL, condition: (Func<bool>)null, bone: NasolabialMouthCornerL ),
+                (path: MoveNasolabialMouthCornerR, condition: (Func<bool>)null, bone: NasolabialMouthCornerR ),
+                (path: MoveCheekUpperL, condition: (Func<bool>)null, bone: CheekUpperL ),
+                (path: MoveCheekUpperR, condition: (Func<bool>)null, bone: CheekUpperR ),
+                (path: MoveBrowInnerL, condition: (Func<bool>)null, bone: BrowInnerL ),
+                (path: MoveBrowInnerR, condition: (Func<bool>)null, bone: BrowInnerR ),
+                (path: MoveBrowMidL, condition: (Func<bool>)null,bone:BrowMidL ),
+                (path: MoveBrowMidR, condition: (Func<bool>)null, bone: BrowMidR ),
+                (path: MoveBrowOuterL, condition: (Func<bool>)null, bone: BrowOuterL ),
+                (path: MoveBrowOuterR, condition: (Func<bool>)null, bone: BrowOuterR ),
+                (path: MoveCenterBrow, condition: (Func<bool>)null, bone: CenterBrow ),
+                (path: MoveJaw, condition: () => h.AniJaw.IsNotRunning(), bone: LowerJaw ),
             };
         }
-        public NumericPath PathEyeCurveShift => throw new NotImplementedException();
-        public NumericPath PathBlink => _pathBlink;
-        public NumericPath PathBlinkUpL => _pathBlinkUpL;
-        public NumericPath PathBlinkUpR => _pathBlinkUpR;
-        public NumericPath PathBlinkDnL => _pathBlinkDnL;
-        public NumericPath PathBlinkDnR => _pathBlinkDnR;
+        public NumericMover MoveEyeCurveShift => throw new NotImplementedException();
+        public NumericMover MoveBlink => _moveBlink;
+        public NumericMover MoveBlinkUpL => _moveBlinkUpL;
+        public NumericMover MoveBlinkUpR => _moveBlinkUpR;
+        public NumericMover MoveBlinkDnL => _moveBlinkDnL;
+        public NumericMover MoveBlinkDnR => _moveBlinkDnR;
         /// <summary>
         /// 1 = ark up like in smile
         /// 0 = normal
@@ -343,7 +343,7 @@ namespace Unianio.Genesis.IK
             lowerTurnOuter = Quaternion.AngleAxis(+6 * value01, v3.left);
         }
 
-        public (HandlePath path, Func<bool> condition, HumBoneHandler bone)[] AllBones => _allBones;
+        public (IExecutorOfProgress path, Func<bool> condition, HumBoneHandler bone)[] AllBones => _allBones;
         public Transform Model { get; }
         public HumBoneHandler LowerFaceRig { get; }
         public HumBoneHandler UpperFaceRig { get; }
@@ -446,116 +446,116 @@ namespace Unianio.Genesis.IK
         public HumBoneHandler[] ArrNasolabialLowers => new[] { NasolabialLowerL, NasolabialLowerR };
 
 
-        public HandlePath PathJaw => _pathJaw ?? (_pathJaw = new HandlePath(LowerJaw));
-        public HandlePath PathLowerFaceRig => _pathLowerFaceRig ?? (_pathLowerFaceRig = new HandlePath(LowerFaceRig));
-        public HandlePath PathUpperFaceRig => _pathUpperFaceRig ?? (_pathUpperFaceRig = new HandlePath(UpperFaceRig));
+        public Mover<HumBoneHandler> MoveJaw => _moveJaw ?? (_moveJaw = new Mover<HumBoneHandler>(LowerJaw));
+        public Mover<HumBoneHandler> MoveLowerFaceRig => _moveLowerFaceRig ?? (_moveLowerFaceRig = new Mover<HumBoneHandler>(LowerFaceRig));
+        public Mover<HumBoneHandler> MoveUpperFaceRig => _moveUpperFaceRig ?? (_moveUpperFaceRig = new Mover<HumBoneHandler>(UpperFaceRig));
         // inner circle around the mouth:
-        public HandlePath PathLipCornerL => _pathLipCornerL ?? (_pathLipCornerL = new HandlePath(LipCornerL));
-        public HandlePath PathLipLowerOuterL => _pathLipLowerOuterL ?? (_pathLipLowerOuterL = new HandlePath(LipLowerOuterL));
-        public HandlePath PathLipLowerInnerL => _pathLipLowerInnerL ?? (_pathLipLowerInnerL = new HandlePath(LipLowerInnerL));
-        public HandlePath PathLipLowerMiddle => _pathLipLowerMiddle ?? (_pathLipLowerMiddle = new HandlePath(LipLowerMiddle));
-        public HandlePath PathLipLowerInnerR => _pathLipLowerInnerR ?? (_pathLipLowerInnerR = new HandlePath(LipLowerInnerR));
-        public HandlePath PathLipLowerOuterR => _pathLipLowerOuterR ?? (_pathLipLowerOuterR = new HandlePath(LipLowerOuterR));
-        public HandlePath PathLipCornerR => _pathLipCornerR ?? (_pathLipCornerR = new HandlePath(LipCornerR));
-        public HandlePath PathLipUpperOuterL => _pathLipUpperOuterL ?? (_pathLipUpperOuterL = new HandlePath(LipUpperOuterL));
-        public HandlePath PathLipUpperInnerL => _pathLipUpperInnerL ?? (_pathLipUpperInnerL = new HandlePath(LipUpperInnerL));
-        public HandlePath PathLipUpperMiddle => _pathLipUpperMiddle ?? (_pathLipUpperMiddle = new HandlePath(LipUpperMiddle));
-        public HandlePath PathLipUpperInnerR => _pathLipUpperInnerR ?? (_pathLipUpperInnerR = new HandlePath(LipUpperInnerR));
-        public HandlePath PathLipUpperOuterR => _pathLipUpperOuterR ?? (_pathLipUpperOuterR = new HandlePath(LipUpperOuterR));
+        public Mover<HumBoneHandler> MoveLipCornerL => _moveLipCornerL ?? (_moveLipCornerL = new Mover<HumBoneHandler>(LipCornerL));
+        public Mover<HumBoneHandler> MoveLipLowerOuterL => _moveLipLowerOuterL ?? (_moveLipLowerOuterL = new Mover<HumBoneHandler>(LipLowerOuterL));
+        public Mover<HumBoneHandler> MoveLipLowerInnerL => _moveLipLowerInnerL ?? (_moveLipLowerInnerL = new Mover<HumBoneHandler>(LipLowerInnerL));
+        public Mover<HumBoneHandler> MoveLipLowerMiddle => _moveLipLowerMiddle ?? (_moveLipLowerMiddle = new Mover<HumBoneHandler>(LipLowerMiddle));
+        public Mover<HumBoneHandler> MoveLipLowerInnerR => _moveLipLowerInnerR ?? (_moveLipLowerInnerR = new Mover<HumBoneHandler>(LipLowerInnerR));
+        public Mover<HumBoneHandler> MoveLipLowerOuterR => _moveLipLowerOuterR ?? (_moveLipLowerOuterR = new Mover<HumBoneHandler>(LipLowerOuterR));
+        public Mover<HumBoneHandler> MoveLipCornerR => _moveLipCornerR ?? (_moveLipCornerR = new Mover<HumBoneHandler>(LipCornerR));
+        public Mover<HumBoneHandler> MoveLipUpperOuterL => _moveLipUpperOuterL ?? (_moveLipUpperOuterL = new Mover<HumBoneHandler>(LipUpperOuterL));
+        public Mover<HumBoneHandler> MoveLipUpperInnerL => _moveLipUpperInnerL ?? (_moveLipUpperInnerL = new Mover<HumBoneHandler>(LipUpperInnerL));
+        public Mover<HumBoneHandler> MoveLipUpperMiddle => _moveLipUpperMiddle ?? (_moveLipUpperMiddle = new Mover<HumBoneHandler>(LipUpperMiddle));
+        public Mover<HumBoneHandler> MoveLipUpperInnerR => _moveLipUpperInnerR ?? (_moveLipUpperInnerR = new Mover<HumBoneHandler>(LipUpperInnerR));
+        public Mover<HumBoneHandler> MoveLipUpperOuterR => _moveLipUpperOuterR ?? (_moveLipUpperOuterR = new Mover<HumBoneHandler>(LipUpperOuterR));
 
 
-        public HandlePath PathLipBelowNoseR => _pathLipBelowNoseR ?? (_pathLipBelowNoseR = new HandlePath(LipBelowNoseR));
-        public HandlePath PathLipNasolabialCreaseR => _pathLipNasolabialCreaseR ?? (_pathLipNasolabialCreaseR = new HandlePath(LipNasolabialCreaseR));
-        public HandlePath PathNasolabialMiddleR => _pathNasolabialMiddleR ?? (_pathNasolabialMiddleR = new HandlePath(NasolabialMiddleR));
-        public HandlePath PathNasolabialUpperR => _pathNasolabialUpperR ?? (_pathNasolabialUpperR = new HandlePath(NasolabialUpperR));
-        public HandlePath PathNostrilR => _pathNostrilR ?? (_pathNostrilR = new HandlePath(NostrilR));
-        public HandlePath PathSquintInnerR => _pathSquintInnerR ?? (_pathSquintInnerR = new HandlePath(SquintInnerR));
-        public HandlePath PathSquintOuterR => _pathSquintOuterR ?? (_pathSquintOuterR = new HandlePath(SquintOuterR));
-        public HandlePath PathJawClenchR => _pathJawClenchR ?? (_pathJawClenchR = new HandlePath(JawClenchR));
-        public HandlePath PathNasolabialLowerR => _pathNasolabialLowerR ?? (_pathNasolabialLowerR = new HandlePath(NasolabialLowerR));
-        public HandlePath PathLipBelowNoseL => _pathLipBelowNoseL ?? (_pathLipBelowNoseL = new HandlePath(LipBelowNoseL));
-        public HandlePath PathLipNasolabialCreaseL => _pathLipNasolabialCreaseL ?? (_pathLipNasolabialCreaseL = new HandlePath(LipNasolabialCreaseL));
-        public HandlePath PathNasolabialMiddleL => _pathNasolabialMiddleL ?? (_pathNasolabialMiddleL = new HandlePath(NasolabialMiddleL));
-        public HandlePath PathNasolabialUpperL => _pathNasolabialUpperL ?? (_pathNasolabialUpperL = new HandlePath(NasolabialUpperL));
-        public HandlePath PathNostrilL => _pathNostrilL ?? (_pathNostrilL = new HandlePath(NostrilL));
-        public HandlePath PathSquintInnerL => _pathSquintInnerL ?? (_pathSquintInnerL = new HandlePath(SquintInnerL));
-        public HandlePath PathSquintOuterL => _pathSquintOuterL ?? (_pathSquintOuterL = new HandlePath(SquintOuterL));
-        public HandlePath PathJawClenchL => _pathJawClenchL ?? (_pathJawClenchL = new HandlePath(JawClenchL));
-        public HandlePath PathNasolabialLowerL => _pathNasolabialLowerL ?? (_pathNasolabialLowerL = new HandlePath(NasolabialLowerL));
+        public Mover<HumBoneHandler> MoveLipBelowNoseR => _moveLipBelowNoseR ?? (_moveLipBelowNoseR = new Mover<HumBoneHandler>(LipBelowNoseR));
+        public Mover<HumBoneHandler> MoveLipNasolabialCreaseR => _moveLipNasolabialCreaseR ?? (_moveLipNasolabialCreaseR = new Mover<HumBoneHandler>(LipNasolabialCreaseR));
+        public Mover<HumBoneHandler> MoveNasolabialMiddleR => _moveNasolabialMiddleR ?? (_moveNasolabialMiddleR = new Mover<HumBoneHandler>(NasolabialMiddleR));
+        public Mover<HumBoneHandler> MoveNasolabialUpperR => _moveNasolabialUpperR ?? (_moveNasolabialUpperR = new Mover<HumBoneHandler>(NasolabialUpperR));
+        public Mover<HumBoneHandler> MoveNostrilR => _moveNostrilR ?? (_moveNostrilR = new Mover<HumBoneHandler>(NostrilR));
+        public Mover<HumBoneHandler> MoveSquintInnerR => _moveSquintInnerR ?? (_moveSquintInnerR = new Mover<HumBoneHandler>(SquintInnerR));
+        public Mover<HumBoneHandler> MoveSquintOuterR => _moveSquintOuterR ?? (_moveSquintOuterR = new Mover<HumBoneHandler>(SquintOuterR));
+        public Mover<HumBoneHandler> MoveJawClenchR => _moveJawClenchR ?? (_moveJawClenchR = new Mover<HumBoneHandler>(JawClenchR));
+        public Mover<HumBoneHandler> MoveNasolabialLowerR => _moveNasolabialLowerR ?? (_moveNasolabialLowerR = new Mover<HumBoneHandler>(NasolabialLowerR));
+        public Mover<HumBoneHandler> MoveLipBelowNoseL => _moveLipBelowNoseL ?? (_moveLipBelowNoseL = new Mover<HumBoneHandler>(LipBelowNoseL));
+        public Mover<HumBoneHandler> MoveLipNasolabialCreaseL => _moveLipNasolabialCreaseL ?? (_moveLipNasolabialCreaseL = new Mover<HumBoneHandler>(LipNasolabialCreaseL));
+        public Mover<HumBoneHandler> MoveNasolabialMiddleL => _moveNasolabialMiddleL ?? (_moveNasolabialMiddleL = new Mover<HumBoneHandler>(NasolabialMiddleL));
+        public Mover<HumBoneHandler> MoveNasolabialUpperL => _moveNasolabialUpperL ?? (_moveNasolabialUpperL = new Mover<HumBoneHandler>(NasolabialUpperL));
+        public Mover<HumBoneHandler> MoveNostrilL => _moveNostrilL ?? (_moveNostrilL = new Mover<HumBoneHandler>(NostrilL));
+        public Mover<HumBoneHandler> MoveSquintInnerL => _moveSquintInnerL ?? (_moveSquintInnerL = new Mover<HumBoneHandler>(SquintInnerL));
+        public Mover<HumBoneHandler> MoveSquintOuterL => _moveSquintOuterL ?? (_moveSquintOuterL = new Mover<HumBoneHandler>(SquintOuterL));
+        public Mover<HumBoneHandler> MoveJawClenchL => _moveJawClenchL ?? (_moveJawClenchL = new Mover<HumBoneHandler>(JawClenchL));
+        public Mover<HumBoneHandler> MoveNasolabialLowerL => _moveNasolabialLowerL ?? (_moveNasolabialLowerL = new Mover<HumBoneHandler>(NasolabialLowerL));
 
-        public HandlePath[] ArrPathLipCorners => new[] { PathLipCornerL, PathLipCornerR };
-        public HandlePath[] ArrPathLipLowerOuters => new[] { PathLipLowerOuterL, PathLipLowerOuterR };
-        public HandlePath[] ArrPathLipLowerInners => new[] { PathLipLowerInnerL, PathLipLowerInnerR };
-        public HandlePath[] ArrPathLipUpperOuters => new[] { PathLipUpperOuterL, PathLipUpperOuterR };
-        public HandlePath[] ArrPathLipUpperInners => new[] { PathLipUpperInnerL, PathLipUpperInnerR };
-        public HandlePath[] ArrPathLipBelowNoses => new[] { PathLipBelowNoseL, PathLipBelowNoseR };
-        public HandlePath[] ArrPathLipNasolabialCreases => new[] { PathLipNasolabialCreaseL, PathLipNasolabialCreaseR };
-        public HandlePath[] ArrPathNasolabialMiddles => new[] { PathNasolabialMiddleL, PathNasolabialMiddleR };
-        public HandlePath[] ArrPathNasolabialUppers => new[] { PathNasolabialUpperL, PathNasolabialUpperR };
-        public HandlePath[] ArrPathNostrils => new[] { PathNostrilL, PathNostrilR };
-        public HandlePath[] ArrPathSquintInners => new[] { PathSquintInnerL, PathSquintInnerR };
-        public HandlePath[] ArrPathSquintOuters => new[] { PathSquintOuterL, PathSquintOuterR };
-        public HandlePath[] ArrPathJawClenches => new[] { PathJawClenchL, PathJawClenchR };
-        public HandlePath[] ArrPathNasolabialLowers => new[] { PathNasolabialLowerL, PathNasolabialLowerR };
+        public Mover<HumBoneHandler>[] ArrPathLipCorners => new[] { MoveLipCornerL, MoveLipCornerR };
+        public Mover<HumBoneHandler>[] ArrPathLipLowerOuters => new[] { MoveLipLowerOuterL, MoveLipLowerOuterR };
+        public Mover<HumBoneHandler>[] ArrPathLipLowerInners => new[] { MoveLipLowerInnerL, MoveLipLowerInnerR };
+        public Mover<HumBoneHandler>[] ArrPathLipUpperOuters => new[] { MoveLipUpperOuterL, MoveLipUpperOuterR };
+        public Mover<HumBoneHandler>[] ArrPathLipUpperInners => new[] { MoveLipUpperInnerL, MoveLipUpperInnerR };
+        public Mover<HumBoneHandler>[] ArrPathLipBelowNoses => new[] { MoveLipBelowNoseL, MoveLipBelowNoseR };
+        public Mover<HumBoneHandler>[] ArrPathLipNasolabialCreases => new[] { MoveLipNasolabialCreaseL, MoveLipNasolabialCreaseR };
+        public Mover<HumBoneHandler>[] ArrPathNasolabialMiddles => new[] { MoveNasolabialMiddleL, MoveNasolabialMiddleR };
+        public Mover<HumBoneHandler>[] ArrPathNasolabialUppers => new[] { MoveNasolabialUpperL, MoveNasolabialUpperR };
+        public Mover<HumBoneHandler>[] ArrPathNostrils => new[] { MoveNostrilL, MoveNostrilR };
+        public Mover<HumBoneHandler>[] ArrPathSquintInners => new[] { MoveSquintInnerL, MoveSquintInnerR };
+        public Mover<HumBoneHandler>[] ArrPathSquintOuters => new[] { MoveSquintOuterL, MoveSquintOuterR };
+        public Mover<HumBoneHandler>[] ArrPathJawClenches => new[] { MoveJawClenchL, MoveJawClenchR };
+        public Mover<HumBoneHandler>[] ArrPathNasolabialLowers => new[] { MoveNasolabialLowerL, MoveNasolabialLowerR };
         //internal HandlePath[] Arrs => new[] { L, R };
 
         // eyes:
-        public HandlePath PathEyeL => _pathEyeL ?? (_pathEyeL = new HandlePath(EyeL));
-        public HandlePath PathEyeR => _pathEyeR ?? (_pathEyeR = new HandlePath(EyeR));
-        public HandlePath[] ArrPathEyes => new[] { PathEyeL, PathEyeR };
+        public Mover<HumBoneHandler> MoveEyeL => _moveEyeL ?? (_moveEyeL = new Mover<HumBoneHandler>(EyeL));
+        public Mover<HumBoneHandler> MoveEyeR => _moveEyeR ?? (_moveEyeR = new Mover<HumBoneHandler>(EyeR));
+        public Mover<HumBoneHandler>[] ArrPathEyes => new[] { MoveEyeL, MoveEyeR };
 
 
         // eyelids:
-        public HandlePath PathEyelidUpperInnerL => _pathEyelidUpperInnerL ?? (_pathEyelidUpperInnerL = new HandlePath(EyelidUpperInnerL));
-        public HandlePath PathEyelidUpperL => _pathEyelidUpperL ?? (_pathEyelidUpperL = new HandlePath(EyelidUpperL));
-        public HandlePath PathEyelidUpperOuterL => _pathEyelidUpperOuterL ?? (_pathEyelidUpperOuterL = new HandlePath(EyelidUpperOuterL));
-        public HandlePath PathEyelidLowerInnerL => _pathEyelidLowerInnerL ?? (_pathEyelidLowerInnerL = new HandlePath(EyelidLowerInnerL));
-        public HandlePath PathEyelidLowerL => _pathEyelidLowerL ?? (_pathEyelidLowerL = new HandlePath(EyelidLowerL));
-        public HandlePath PathEyelidLowerOuterL => _pathEyelidLowerOuterL ?? (_pathEyelidLowerOuterL = new HandlePath(EyelidLowerOuterL));
-        public HandlePath PathEyelidUpperInnerR => _pathEyelidUpperInnerR ?? (_pathEyelidUpperInnerR = new HandlePath(EyelidUpperInnerR));
-        public HandlePath PathEyelidUpperR => _pathEyelidUpperR ?? (_pathEyelidUpperR = new HandlePath(EyelidUpperR));
-        public HandlePath PathEyelidUpperOuterR => _pathEyelidUpperOuterR ?? (_pathEyelidUpperOuterR = new HandlePath(EyelidUpperOuterR));
-        public HandlePath PathEyelidLowerInnerR => _pathEyelidLowerInnerR ?? (_pathEyelidLowerInnerR = new HandlePath(EyelidLowerInnerR));
-        public HandlePath PathEyelidLowerR => _pathEyelidLowerR ?? (_pathEyelidLowerR = new HandlePath(EyelidLowerR));
-        public HandlePath PathEyelidLowerOuterR => _pathEyelidLowerOuterR ?? (_pathEyelidLowerOuterR = new HandlePath(EyelidLowerOuterR));
-        public HandlePath PathEyelidInnerL => _pathEyelidInnerL ?? (_pathEyelidInnerL = new HandlePath(EyelidInnerL));
-        public HandlePath PathEyelidOuterL => _pathEyelidOuterL ?? (_pathEyelidOuterL = new HandlePath(EyelidOuterL));
-        public HandlePath PathEyelidInnerR => _pathEyelidInnerR ?? (_pathEyelidInnerR = new HandlePath(EyelidInnerR));
-        public HandlePath PathEyelidOuterR => _pathEyelidOuterR ?? (_pathEyelidOuterR = new HandlePath(EyelidOuterR));
+        public Mover<HumBoneHandler> MoveEyelidUpperInnerL => _moveEyelidUpperInnerL ?? (_moveEyelidUpperInnerL = new Mover<HumBoneHandler>(EyelidUpperInnerL));
+        public Mover<HumBoneHandler> MoveEyelidUpperL => _moveEyelidUpperL ?? (_moveEyelidUpperL = new Mover<HumBoneHandler>(EyelidUpperL));
+        public Mover<HumBoneHandler> MoveEyelidUpperOuterL => _moveEyelidUpperOuterL ?? (_moveEyelidUpperOuterL = new Mover<HumBoneHandler>(EyelidUpperOuterL));
+        public Mover<HumBoneHandler> MoveEyelidLowerInnerL => _moveEyelidLowerInnerL ?? (_moveEyelidLowerInnerL = new Mover<HumBoneHandler>(EyelidLowerInnerL));
+        public Mover<HumBoneHandler> MoveEyelidLowerL => _moveEyelidLowerL ?? (_moveEyelidLowerL = new Mover<HumBoneHandler>(EyelidLowerL));
+        public Mover<HumBoneHandler> MoveEyelidLowerOuterL => _moveEyelidLowerOuterL ?? (_moveEyelidLowerOuterL = new Mover<HumBoneHandler>(EyelidLowerOuterL));
+        public Mover<HumBoneHandler> MoveEyelidUpperInnerR => _moveEyelidUpperInnerR ?? (_moveEyelidUpperInnerR = new Mover<HumBoneHandler>(EyelidUpperInnerR));
+        public Mover<HumBoneHandler> MoveEyelidUpperR => _moveEyelidUpperR ?? (_moveEyelidUpperR = new Mover<HumBoneHandler>(EyelidUpperR));
+        public Mover<HumBoneHandler> MoveEyelidUpperOuterR => _moveEyelidUpperOuterR ?? (_moveEyelidUpperOuterR = new Mover<HumBoneHandler>(EyelidUpperOuterR));
+        public Mover<HumBoneHandler> MoveEyelidLowerInnerR => _moveEyelidLowerInnerR ?? (_moveEyelidLowerInnerR = new Mover<HumBoneHandler>(EyelidLowerInnerR));
+        public Mover<HumBoneHandler> MoveEyelidLowerR => _moveEyelidLowerR ?? (_moveEyelidLowerR = new Mover<HumBoneHandler>(EyelidLowerR));
+        public Mover<HumBoneHandler> MoveEyelidLowerOuterR => _moveEyelidLowerOuterR ?? (_moveEyelidLowerOuterR = new Mover<HumBoneHandler>(EyelidLowerOuterR));
+        public Mover<HumBoneHandler> MoveEyelidInnerL => _moveEyelidInnerL ?? (_moveEyelidInnerL = new Mover<HumBoneHandler>(EyelidInnerL));
+        public Mover<HumBoneHandler> MoveEyelidOuterL => _moveEyelidOuterL ?? (_moveEyelidOuterL = new Mover<HumBoneHandler>(EyelidOuterL));
+        public Mover<HumBoneHandler> MoveEyelidInnerR => _moveEyelidInnerR ?? (_moveEyelidInnerR = new Mover<HumBoneHandler>(EyelidInnerR));
+        public Mover<HumBoneHandler> MoveEyelidOuterR => _moveEyelidOuterR ?? (_moveEyelidOuterR = new Mover<HumBoneHandler>(EyelidOuterR));
 
 
-        public HandlePath[] ArrPathEyelidUpperInners => new[] { PathEyelidUpperInnerL, PathEyelidUpperInnerR };
-        public HandlePath[] ArrPathEyelidUppers => new[] { PathEyelidUpperL, PathEyelidUpperR };
-        public HandlePath[] ArrPathEyelidUpperOuters => new[] { PathEyelidUpperOuterL, PathEyelidUpperOuterR };
-        public HandlePath[] ArrPathEyelidLowerInners => new[] { PathEyelidLowerInnerL, PathEyelidLowerInnerR };
-        public HandlePath[] ArrPathEyelidLowers => new[] { PathEyelidLowerL, PathEyelidLowerR };
-        public HandlePath[] ArrPathEyelidLowerOuters => new[] { PathEyelidLowerOuterL, PathEyelidLowerOuterR };
-        public HandlePath[] ArrPathEyelidInners => new[] { PathEyelidInnerL, PathEyelidInnerR };
-        public HandlePath[] ArrPathEyelidOuters => new[] { PathEyelidOuterL, PathEyelidOuterR };
+        public Mover<HumBoneHandler>[] ArrPathEyelidUpperInners => new[] { MoveEyelidUpperInnerL, MoveEyelidUpperInnerR };
+        public Mover<HumBoneHandler>[] ArrPathEyelidUppers => new[] { MoveEyelidUpperL, MoveEyelidUpperR };
+        public Mover<HumBoneHandler>[] ArrPathEyelidUpperOuters => new[] { MoveEyelidUpperOuterL, MoveEyelidUpperOuterR };
+        public Mover<HumBoneHandler>[] ArrPathEyelidLowerInners => new[] { MoveEyelidLowerInnerL, MoveEyelidLowerInnerR };
+        public Mover<HumBoneHandler>[] ArrPathEyelidLowers => new[] { MoveEyelidLowerL, MoveEyelidLowerR };
+        public Mover<HumBoneHandler>[] ArrPathEyelidLowerOuters => new[] { MoveEyelidLowerOuterL, MoveEyelidLowerOuterR };
+        public Mover<HumBoneHandler>[] ArrPathEyelidInners => new[] { MoveEyelidInnerL, MoveEyelidInnerR };
+        public Mover<HumBoneHandler>[] ArrPathEyelidOuters => new[] { MoveEyelidOuterL, MoveEyelidOuterR };
 
 
         // eyebrows:
-        public HandlePath PathMidNoseBridge => _pathMidNoseBridge ?? (_pathMidNoseBridge = new HandlePath(MidNoseBridge));
-        public HandlePath PathBrowOuterL => _pathBrowOuterL ?? (_pathBrowOuterL = new HandlePath(BrowOuterL));
-        public HandlePath PathBrowMidL => _pathBrowMidL ?? (_pathBrowMidL = new HandlePath(BrowMidL));
-        public HandlePath PathBrowInnerL => _pathBrowInnerL ?? (_pathBrowInnerL = new HandlePath(BrowInnerL));
-        public HandlePath PathCenterBrow => _pathCenterBrow ?? (_pathCenterBrow = new HandlePath(CenterBrow));
-        public HandlePath PathBrowInnerR => _pathBrowInnerR ?? (_pathBrowInnerR = new HandlePath(BrowInnerR));
-        public HandlePath PathBrowMidR => _pathBrowMidR ?? (_pathBrowMidR = new HandlePath(BrowMidR));
-        public HandlePath PathBrowOuterR => _pathBrowOuterR ?? (_pathBrowOuterR = new HandlePath(BrowOuterR));
-        public HandlePath[] ArrPathBrowOuters => new[] { PathBrowOuterL, PathBrowOuterR };
-        public HandlePath[] ArrPathBrowMids => new[] { PathBrowMidL, PathBrowMidR };
-        public HandlePath[] ArrPathBrowInners => new[] { PathBrowInnerL, PathBrowInnerR };
+        public Mover<HumBoneHandler> MoveMidNoseBridge => _moveMidNoseBridge ?? (_moveMidNoseBridge = new Mover<HumBoneHandler>(MidNoseBridge));
+        public Mover<HumBoneHandler> MoveBrowOuterL => _moveBrowOuterL ?? (_moveBrowOuterL = new Mover<HumBoneHandler>(BrowOuterL));
+        public Mover<HumBoneHandler> MoveBrowMidL => _moveBrowMidL ?? (_moveBrowMidL = new Mover<HumBoneHandler>(BrowMidL));
+        public Mover<HumBoneHandler> MoveBrowInnerL => _moveBrowInnerL ?? (_moveBrowInnerL = new Mover<HumBoneHandler>(BrowInnerL));
+        public Mover<HumBoneHandler> MoveCenterBrow => _moveCenterBrow ?? (_moveCenterBrow = new Mover<HumBoneHandler>(CenterBrow));
+        public Mover<HumBoneHandler> MoveBrowInnerR => _moveBrowInnerR ?? (_moveBrowInnerR = new Mover<HumBoneHandler>(BrowInnerR));
+        public Mover<HumBoneHandler> MoveBrowMidR => _moveBrowMidR ?? (_moveBrowMidR = new Mover<HumBoneHandler>(BrowMidR));
+        public Mover<HumBoneHandler> MoveBrowOuterR => _moveBrowOuterR ?? (_moveBrowOuterR = new Mover<HumBoneHandler>(BrowOuterR));
+        public Mover<HumBoneHandler>[] ArrPathBrowOuters => new[] { MoveBrowOuterL, MoveBrowOuterR };
+        public Mover<HumBoneHandler>[] ArrPathBrowMids => new[] { MoveBrowMidL, MoveBrowMidR };
+        public Mover<HumBoneHandler>[] ArrPathBrowInners => new[] { MoveBrowInnerL, MoveBrowInnerR };
 
         //  cheeks:
-        public HandlePath PathCheekUpperL => _pathCheekUpperL ?? (_pathCheekUpperL = new HandlePath(CheekUpperL));
-        public HandlePath PathCheekLowerL => _pathCheekLowerL ?? (_pathCheekLowerL = new HandlePath(CheekLowerL));
-        public HandlePath PathCheekLowerR => _pathCheekLowerR ?? (_pathCheekLowerR = new HandlePath(CheekLowerR));
-        public HandlePath PathCheekUpperR => _pathCheekUpperR ?? (_pathCheekUpperR = new HandlePath(CheekUpperR));
-        public HandlePath PathNasolabialMouthCornerL => _pathNasolabialMouthCornerL ?? (_pathNasolabialMouthCornerL = new HandlePath(NasolabialMouthCornerL));
-        public HandlePath PathNasolabialMouthCornerR => _pathNasolabialMouthCornerR ?? (_pathNasolabialMouthCornerR = new HandlePath(NasolabialMouthCornerR));
-        public HandlePath[] ArrPathCheekUppers => new[] { PathCheekUpperL, PathCheekUpperR };
-        public HandlePath[] ArrPathCheekLowers => new[] { PathCheekLowerL, PathCheekLowerR };
-        public HandlePath[] ArrPathNasolabialMouthCorners => new[] { PathNasolabialMouthCornerL, PathNasolabialMouthCornerR };
+        public Mover<HumBoneHandler> MoveCheekUpperL => _moveCheekUpperL ?? (_moveCheekUpperL = new Mover<HumBoneHandler>(CheekUpperL));
+        public Mover<HumBoneHandler> MoveCheekLowerL => _moveCheekLowerL ?? (_moveCheekLowerL = new Mover<HumBoneHandler>(CheekLowerL));
+        public Mover<HumBoneHandler> MoveCheekLowerR => _moveCheekLowerR ?? (_moveCheekLowerR = new Mover<HumBoneHandler>(CheekLowerR));
+        public Mover<HumBoneHandler> MoveCheekUpperR => _moveCheekUpperR ?? (_moveCheekUpperR = new Mover<HumBoneHandler>(CheekUpperR));
+        public Mover<HumBoneHandler> MoveNasolabialMouthCornerL => _moveNasolabialMouthCornerL ?? (_moveNasolabialMouthCornerL = new Mover<HumBoneHandler>(NasolabialMouthCornerL));
+        public Mover<HumBoneHandler> MoveNasolabialMouthCornerR => _moveNasolabialMouthCornerR ?? (_moveNasolabialMouthCornerR = new Mover<HumBoneHandler>(NasolabialMouthCornerR));
+        public Mover<HumBoneHandler>[] ArrPathCheekUppers => new[] { MoveCheekUpperL, MoveCheekUpperR };
+        public Mover<HumBoneHandler>[] ArrPathCheekLowers => new[] { MoveCheekLowerL, MoveCheekLowerR };
+        public Mover<HumBoneHandler>[] ArrPathNasolabialMouthCorners => new[] { MoveNasolabialMouthCornerL, MoveNasolabialMouthCornerR };
     }
 }

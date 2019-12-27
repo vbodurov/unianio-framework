@@ -136,6 +136,13 @@ namespace Unianio.Extensions
                 children[i] = current.GetChild(i);
             return children;
         }
+        public static bool ContainsChildNamed(this Transform current, string name)
+        {
+            for (var i = 0; i < current.childCount; ++i)
+                if (current.GetChild(i).name == name)
+                    return true;
+            return false;
+        }
         public static Transform Wrap(this Transform transform, Transform parent, Vector3 lookFwWorldDir, Vector3 lookUpWorldDir)
         {
             return wrapTransformInHolder(parent, transform, lookFwWorldDir, lookUpWorldDir);

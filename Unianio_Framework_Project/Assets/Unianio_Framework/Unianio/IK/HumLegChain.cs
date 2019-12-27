@@ -2,6 +2,7 @@
 using Unianio.Enums;
 using Unianio.Extensions;
 using Unianio.Human;
+using Unianio.Moves;
 using Unianio.Rigged;
 using Unianio.Static;
 using UnityEngine;
@@ -11,7 +12,7 @@ namespace Unianio.IK
 {
     public class HumLegChain : BaseIkChain, IInitialOrientationHolder
     {
-        readonly HumanoidPart _part;
+        readonly BodyPart _part;
         readonly IComplexHumanDefinition _definition;
         public readonly Transform Pelvis, ThighBend, ThighTwist, Shin, Foot,
             Metatarsals, Toe,
@@ -36,17 +37,18 @@ namespace Unianio.IK
 
         readonly bool _isRight;
         public float MaxStretch => _maxStretch;
+        public Transform Model => _model;
 
-        public HumLegChain(HumanoidPart part, IComplexHumanDefinition definition) : base(part)
+        public HumLegChain(BodyPart part, IComplexHumanDefinition definition) : base(part)
         {
             _part = part;
-            _isRight = part == HumanoidPart.LegR;
+            _isRight = part == BodyPart.LegR;
             _definition = definition;
             _model = definition.Model;
             var modelFw = _model.forward;
             var modelUp = _model.up;
 //            var modelSide = _isRight ? _model.right : -_model.right;
-            var leg = part == HumanoidPart.LegL ? definition.LegL : definition.LegR;
+            var leg = part == BodyPart.LegL ? definition.LegL : definition.LegR;
 
             Pelvis = leg.ThighBend.parent;
 
@@ -61,8 +63,8 @@ namespace Unianio.IK
             Metatarsals = leg.Metatarsals;
             Toe = leg.ToeHolder ?? leg.Toe;
 
-            FootHandler = new HumBoneHandler(_isRight ? HumanoidPart.FootR : HumanoidPart.FootL, _model, Foot);
-            ToeHandler = new HumBoneHandler(_isRight ? HumanoidPart.ToesR : HumanoidPart.ToesL, _model, Toe);
+            FootHandler = new HumBoneHandler(_isRight ? BodyPart.FootR : BodyPart.FootL, _model, Foot);
+            ToeHandler = new HumBoneHandler(_isRight ? BodyPart.ToesR : BodyPart.ToesL, _model, Toe);
 
             _handle = CreateHandle(Pelvis, _part, false, Foot.position, modelFw, modelUp);
 
@@ -107,10 +109,31 @@ namespace Unianio.IK
         public Vector3 IniModelPos { get; }
         public Quaternion IniLocalRot { get; }
         public Quaternion IniModelRot { get; }
+        public Vector3 IniLocalSca => v3.one;
         public Vector3 IniLocalFw => IniLocalRot * Vector3.forward;
         public Vector3 IniLocalUp => IniLocalRot * Vector3.up;
         public Vector3 IniModelFw => IniModelRot * Vector3.forward;
         public Vector3 IniModelUp => IniModelRot * Vector3.up;
+        public IExecutorOfProgress ToInitialLocalPosition()
+        {
+            return new Mover<HumLegChain>(this).New().Local.LineTo(b => b.IniLocalPos);
+        }
+        public IExecutorOfProgress ToInitialLocalRotation()
+        {
+            return new Mover<HumLegChain>(this).New().Local.RotateTo(b => b.IniLocalRot);
+        }
+        public IExecutorOfProgress ToInitialLocalScale()
+        {
+            return new Mover<HumLegChain>(this).New().Local.ScaleTo(b => b.IniLocalSca);
+        }
+        public IExecutorOfProgress ToInitialLocal()
+        {
+            return new Mover<HumLegChain>(this).New().Local
+                    .LineTo(b => b.IniLocalPos)
+                    .RotateTo(b => b.IniLocalRot)
+                    .ScaleTo(b => b.IniLocalSca)
+                ;
+        }
 
         public Vector3 SideDir => _isRight ? v3.rt : v3.lt;
         protected override void ProcessMove(bool hasPositionChange, bool hasRotationChange)

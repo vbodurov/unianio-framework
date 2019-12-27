@@ -19,7 +19,7 @@ namespace Unianio.IK
         readonly Vector3 _handleIniLocPos;
         readonly float _headToHandleDist;
 
-        public BraidChain(IComplexHuman human, params Transform[] nodes) : base(HumanoidPart.Braid)
+        public BraidChain(IComplexHuman human, params Transform[] nodes) : base(BodyPart.Braid)
         {
             _human = human;
             _nodes = nodes ?? throw new ArgumentException("No braid nodes found");
@@ -37,7 +37,7 @@ namespace Unianio.IK
             const float LastLen = 0.1f;
             _joinLengths[_joinLengths.Length - 1] = LastLen;
             var lastNode = nodes[nodes.Length - 1]; // hair6
-            _handle = CreateHandle(_human.Head.Holder, HumanoidPart.Braid, false, lastNode.position + lastNode.forward.By(LastLen), human.dn, human.bk);
+            _handle = CreateHandle(_human.Head.Holder, BodyPart.Braid, false, lastNode.position + lastNode.forward.By(LastLen), human.dn, human.bk);
 
             _iniRootPositions = new Vector3[_nodes.Length + 1]; // for each position except root
             for (var i = 0; i < _nodes.Length; ++i)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unianio.Enums;
 using Unianio.Extensions;
 using Unianio.Human;
@@ -10,23 +11,21 @@ using static Unianio.Static.fun;
 
 namespace Unianio.MakeHuman
 {
-    public class MakeHumanBoneWrapperProcessed : MonoBehaviour { }
     public class MakeHumanBoneWrapper : IHumanBoneWrapper
     {
         const string WrappedSuffix = "_Wrapped";
+        const string Processed = "__MakeHumanBoneWrapped__";
         void IHumanBoneWrapper.Wrap(Transform model, string personaId, string customTag)
         {
-            var d = model.PlaceChildrenInNonStrictDictionary();
+            if(model.ContainsChildNamed(Processed)) return;
+            model.AddEmptyChild(Processed);
 
-            var alreadyProcessed = model.gameObject.GetComponent<MakeHumanBoneWrapperProcessed>();
-            if(alreadyProcessed != null) return;
+            var d = model.PlaceChildrenInNonStrictDictionary();
 
             Spine(d, model);
             Head(d, model);
             Arms(d, model);
             Legs(d, model);
-
-            model.gameObject.AddComponent<MakeHumanBoneWrapperProcessed>();
         }
         void Spine(IDictionary<string, Transform> d, Transform model)
         {
@@ -198,7 +197,13 @@ namespace Unianio.MakeHuman
                 var forearmTwistUp = slerp(in handUp, in elbowUp, 0.5)
                     .ProjectOnPlaneAndNormalize(in lowerArmFw);
 
-                RotateBone(d, mb.clavicle_L.MHBonePx(sd), modelFw, modelUp);
+                var clavicle = GetBone(d, mb.clavicle_L.MHBonePx(sd));
+                var armRoot = new GameObject(mb.arm_root_L.MHBonePx(sd)).transform;
+                armRoot.position = clavicle.position;
+                armRoot.rotation = lookAt(modelFw, modelUp);
+                armRoot.SetParent(clavicle.parent);
+                clavicle.SetParent(armRoot);
+                RotateBone(d, mb.clavicle_L.MHBonePx(sd), mb.shoulder01_L.MHBonePx(sd), modelUp);
                 RotateBone(d, mb.shoulder01_L.MHBonePx(sd), mb.upperarm01_L.MHBonePx(sd), modelUp);
                 var fwSh = RotateBone(d, mb.upperarm01_L.MHBonePx(sd), mb.lowerarm01_L.MHBonePx(sd), shoulderUp);
                 RotateBone(d, mb.upperarm02_L.MHBonePx(sd), fwSh, shoulderTwistUp);

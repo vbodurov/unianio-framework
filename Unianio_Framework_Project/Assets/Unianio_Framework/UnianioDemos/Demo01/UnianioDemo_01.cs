@@ -1,16 +1,20 @@
-﻿using Unianio.Events;
+﻿using Unianio;
+using Unianio.Events;
+using Unianio.Services;
 using UnianioDemos.Demo01;
 using UnityEngine;
 using static Unianio.Static.fun;
 
 public class UnianioDemo_01 : MonoBehaviour
 {
-    void Start()
+    public void Stand()
     {
-        subscribe<HumanRegistered>(OnHumanRegistered, this);
+        var human = get<IHumanManager>().GetHumanByPersona(humanNamed.John);
+        play<IdleAni>().Set(human);
     }
-    void OnHumanRegistered(HumanRegistered e)
+    public void Walk()
     {
-        play<IdleAni>().Set(e.Human);
+        var human = get<IHumanManager>().GetHumanByPersona(humanNamed.John);
+        play<WalkAni>().Set(human);
     }
 }

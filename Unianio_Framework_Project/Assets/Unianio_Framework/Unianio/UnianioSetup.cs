@@ -12,13 +12,17 @@ namespace Unianio
 
         SceneHolder _aniHolder;
         
-        void Start()
+        void OnEnable()
         {
             var factory = GlobalFactory.Default;
             _aniHolder =
                 factory
                     .Get<SceneHolder>()
-                    .Initialize();
+                    .OnEnable();
+        }
+        void Start()
+        {
+            _aniHolder.Initialize();
         }
 
         void FixedUpdate()

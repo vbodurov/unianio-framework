@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.Text;
 using System.Threading;
-using Unianio.Graphs;
+using Unianio.Moves;
 
 namespace Unianio.Extensions
 {

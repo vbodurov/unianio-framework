@@ -164,7 +164,7 @@ namespace Unianio.Extensions
         public static bool IsOneOf(this int n, params int[] args) { return args.Contains(n); }
         public static bool IsEven(this int n) => n % 2 == 0;
         public static bool IsOdd(this int n) => n % 2 != 0;
-        public static bool IsDivisibleBy(this int n, int divider) => n % divider != 0;
+        public static bool IsDivisibleBy(this int n, int divider) => n % divider == 0;
         public static bool IsOneOfBones(this int index, in BoneWeight bw, out float weight)
         {
             if(bw.boneIndex0 == index)

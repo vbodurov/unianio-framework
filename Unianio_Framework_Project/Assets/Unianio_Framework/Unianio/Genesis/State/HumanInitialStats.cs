@@ -39,14 +39,14 @@ namespace Unianio.Genesis.State
                 LocRotJaw = h.MHFace.Jaw.Holder.localRotation;
             }
 
-            ModelPosArmL = h.ArmL.position.AsLocalPoint(h.Model);
-            ModelPosArmR = h.ArmR.position.AsLocalPoint(h.Model);
+            ModelPosArmL = h.ArmL.Control.position.AsLocalPoint(h.Model);
+            ModelPosArmR = h.ArmR.Control.position.AsLocalPoint(h.Model);
 
-            LocalPosArmL = h.ArmL.Handle.localPosition;
-            LocalPosArmR = h.ArmR.Handle.localPosition;
+            LocalPosArmL = h.ArmL.Control.localPosition;
+            LocalPosArmR = h.ArmR.Control.localPosition;
 
-            LocRotArmL = h.ArmL.Handle.localRotation;
-            LocRotArmR = h.ArmR.Handle.localRotation;
+            LocRotArmL = h.ArmL.Control.localRotation;
+            LocRotArmR = h.ArmR.Control.localRotation;
 
             Fingers[BodySide.Left] = new Dictionary<FingerName, IDictionary<int, PosRot>>()
             {

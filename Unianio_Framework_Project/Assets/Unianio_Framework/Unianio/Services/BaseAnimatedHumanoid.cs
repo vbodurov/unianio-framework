@@ -24,7 +24,7 @@ namespace Unianio.Services
         IAnimation AniBlink { get; set; }
         IAnimation AniJaw { get; set; }
 
-        IAnimation AniByType(HumanoidPart p);
+        IAnimation AniByType(BodyPart p);
         void ForceStopAllAnimations();
     }
     public abstract class BaseAnimatedHumanoid : IAnimatedHumanoid
@@ -48,25 +48,25 @@ namespace Unianio.Services
         IAnimation IAnimatedHumanoid.AniBlink { get; set; }
         IAnimation IAnimatedHumanoid.AniJaw { get; set; }
 
-        IAnimation IAnimatedHumanoid.AniByType(HumanoidPart p)
+        IAnimation IAnimatedHumanoid.AniByType(BodyPart p)
         {
             switch (p)
             {
-                case HumanoidPart.EntireBody: return _this.AniEntireBody;
-                case HumanoidPart.Face: return _this.AniFace;
-                case HumanoidPart.Head: return _this.AniHead;
-                case HumanoidPart.ArmR: return _this.AniArmR;
-                case HumanoidPart.ArmL: return _this.AniArmL;
-                case HumanoidPart.LegR: return _this.AniLegR;
-                case HumanoidPart.LegL: return _this.AniLegL;
-                case HumanoidPart.HandL: return _this.AniHandL;
-                case HumanoidPart.HandR: return _this.AniHandR;
-                case HumanoidPart.Torso: return _this.AniTorso;
-                case HumanoidPart.BreastL: return _this.AniBreastL;
-                case HumanoidPart.BreastR: return _this.AniBreastR;
-                case HumanoidPart.Spine: return _this.AniSpine;
-                case HumanoidPart.BothEyelids: return _this.AniBlink;
-                case HumanoidPart.Jaw: return _this.AniJaw;
+                case BodyPart.EntireBody: return _this.AniEntireBody;
+                case BodyPart.Face: return _this.AniFace;
+                case BodyPart.Head: return _this.AniHead;
+                case BodyPart.ArmR: return _this.AniArmR;
+                case BodyPart.ArmL: return _this.AniArmL;
+                case BodyPart.LegR: return _this.AniLegR;
+                case BodyPart.LegL: return _this.AniLegL;
+                case BodyPart.HandL: return _this.AniHandL;
+                case BodyPart.HandR: return _this.AniHandR;
+                case BodyPart.Torso: return _this.AniTorso;
+                case BodyPart.BreastL: return _this.AniBreastL;
+                case BodyPart.BreastR: return _this.AniBreastR;
+                case BodyPart.Spine: return _this.AniSpine;
+                case BodyPart.BothEyelids: return _this.AniBlink;
+                case BodyPart.Jaw: return _this.AniJaw;
             }
             return null;
         }

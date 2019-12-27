@@ -25,6 +25,8 @@
         public const string breast_L = "breast_L";
         public const string breast_R = "breast_R";
         public const string spine01 = "spine01";
+        public const string arm_root_L = "arm_root_L";
+        public const string arm_root_R = "arm_root_R";
         public const string clavicle_L = "clavicle_L";
         public const string shoulder01_L = "shoulder01_L";
         public const string upperarm01_L = "upperarm01_L";

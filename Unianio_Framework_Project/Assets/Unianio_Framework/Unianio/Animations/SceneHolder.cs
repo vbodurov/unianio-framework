@@ -1,4 +1,5 @@
 ﻿using Unianio.Services;
+using UnityEngine;
 using static Unianio.Static.fun;
 
 namespace Unianio.Animations
@@ -11,7 +12,7 @@ namespace Unianio.Animations
         readonly AnimationHolder _fixedUpdateAnimations = new AnimationHolder();
         IUnitySceneRootService _rootService;
 
-        public SceneHolder Initialize()
+        public SceneHolder OnEnable()
         {
             subscribe<PlayAni>(e =>
             {
@@ -25,13 +26,14 @@ namespace Unianio.Animations
                     _fixedUpdateAnimations.AddAnimation(e.Ani);
             }, this);
 
+            return this;
+        }
+        internal void Initialize()
+        {
             if (UnianioConfig.UseAnimatedHumans) play<IHumanManager>(aniQueue.LateQueue);
 
             _rootService = get<IUnitySceneRootService>() ?? new VoidUnitySceneRootService();
             _rootService.Initialize();
-            
-
-            return this;
         }
         internal void Update()
         {

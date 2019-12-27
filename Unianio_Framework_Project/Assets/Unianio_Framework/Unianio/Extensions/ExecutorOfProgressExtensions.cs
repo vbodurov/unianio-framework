@@ -1,4 +1,6 @@
-﻿using Unianio.Graphs;
+﻿using Unianio.Enums;
+using Unianio.Moves;
+using UnityEngine;
 
 namespace Unianio.Extensions
 {
@@ -13,8 +15,9 @@ namespace Unianio.Extensions
         }
         public static T WithID<T>(this T eop, int id) where T : IExecutorOfProgress
         {
-            eop.ID = id;
+            eop.Tag = id;
             return eop;
         }
+        
     }
 }

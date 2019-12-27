@@ -1,4 +1,5 @@
-﻿using Unianio.Graphs;
+﻿
+using Unianio.Moves;
 
 namespace Unianio.Human
 {
@@ -19,12 +20,12 @@ namespace Unianio.Human
         /// -1 = ark down like when looking down
         /// </summary>
         double EyeCurveShiftM11 { get; set; }
-        NumericPath PathEyeCurveShift { get; }
-        NumericPath PathBlink { get; }
-        NumericPath PathBlinkUpL { get; }
-        NumericPath PathBlinkUpR { get; }
-        NumericPath PathBlinkDnL { get; }
-        NumericPath PathBlinkDnR { get; }
+        NumericMover MoveEyeCurveShift { get; }
+        NumericMover MoveBlink { get; }
+        NumericMover MoveBlinkUpL { get; }
+        NumericMover MoveBlinkUpR { get; }
+        NumericMover MoveBlinkDnL { get; }
+        NumericMover MoveBlinkDnR { get; }
         
     }
 }

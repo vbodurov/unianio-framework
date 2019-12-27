@@ -141,13 +141,13 @@ namespace Unianio.Extensions
         }
 
 
-        public static bool IsPointInFrontOf(in this Vector3 targetPoint, IBaseManipulator manipulator)
+        public static bool IsPointInFrontOf(in this Vector3 targetPoint, IControlHolder manipulator)
         {
-            return point.IsAbovePlane(in targetPoint, manipulator.Manipulator.forward, manipulator.Manipulator.position);
+            return point.IsAbovePlane(in targetPoint, manipulator.Control.forward, manipulator.Control.position);
         }
-        public static bool IsPointAbove(in this Vector3 targetPoint, IBaseManipulator manipulator)
+        public static bool IsPointAbove(in this Vector3 targetPoint, IControlHolder manipulator)
         {
-            return point.IsAbovePlane(in targetPoint, manipulator.Manipulator.up, manipulator.Manipulator.position);
+            return point.IsAbovePlane(in targetPoint, manipulator.Control.up, manipulator.Control.position);
         }
         public static bool IsPointInFrontOf(in this Vector3 targetPoint, Transform transform)
         {
@@ -204,34 +204,34 @@ namespace Unianio.Extensions
         }
 
 
-        public static Vector3 AsLocalDir(in this Vector3 worldDirection, IBaseManipulator bm)
+        public static Vector3 AsLocalDir(in this Vector3 worldDirection, IControlHolder bm)
         {
-            return bm.Manipulator.InverseTransformDirection(worldDirection);
+            return bm.Control.InverseTransformDirection(worldDirection);
         }
-        public static Vector3 AsLocalVec(in this Vector3 worldVector, IBaseManipulator bm)
+        public static Vector3 AsLocalVec(in this Vector3 worldVector, IControlHolder bm)
         {
-            return bm.Manipulator.InverseTransformVector(worldVector);
+            return bm.Control.InverseTransformVector(worldVector);
         }
-        public static Vector3 AsLocalPoint(in this Vector3 worldPoint, IBaseManipulator bm)
+        public static Vector3 AsLocalPoint(in this Vector3 worldPoint, IControlHolder bm)
         {
-            return bm.Manipulator.InverseTransformPoint(worldPoint);
+            return bm.Control.InverseTransformPoint(worldPoint);
         }
 
-        public static Vector3 AsWorldDir(in this Vector3 localDirection, IBaseManipulator bm)
+        public static Vector3 AsWorldDir(in this Vector3 localDirection, IControlHolder bm)
         {
-            return bm.Manipulator.TransformDirection(localDirection);
+            return bm.Control.TransformDirection(localDirection);
         }
-        public static Vector3 AsWorldVec(in this Vector3 localVector, IBaseManipulator bm)
+        public static Vector3 AsWorldVec(in this Vector3 localVector, IControlHolder bm)
         {
-            return bm.Manipulator.TransformVector(localVector);
+            return bm.Control.TransformVector(localVector);
         }
-        public static Vector3 AsWorldPoint(in this Vector3 localPoint, IBaseManipulator bm)
+        public static Vector3 AsWorldPoint(in this Vector3 localPoint, IControlHolder bm)
         {
-            return bm.Manipulator.TransformPoint(localPoint);
+            return bm.Control.TransformPoint(localPoint);
         }
-        public static Vector3 AsOtherLocalPoint(in this Vector3 localPoint, IBaseManipulator fromLocal, IBaseManipulator toLocal)
+        public static Vector3 AsOtherLocalPoint(in this Vector3 localPoint, IControlHolder fromLocal, IControlHolder toLocal)
         {
-            return toLocal.Manipulator.InverseTransformPoint(fromLocal.Manipulator.TransformPoint(localPoint));
+            return toLocal.Control.InverseTransformPoint(fromLocal.Control.TransformPoint(localPoint));
         }
         public static Vector3 AsOtherLocalPoint(in this Vector3 localPoint, Transform fromLocal, Transform toLocal)
         {

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using Unianio.Animations.Common;
 using Unianio.Enums;
 using Unianio.Extensions;
 using Unianio.Genesis.IK;
-using Unianio.Graphs;
 using Unianio.IK;
+using Unianio.Moves;
+using Unianio.Rigged;
 using Unianio.Static;
 using UnityEngine;
 using static Unianio.Static.fun;
@@ -17,7 +19,47 @@ namespace Unianio.Animations
 
         public FuncAni GetBlinkAni(double seconds, Func<double, double> func = null)
             => blinkAni(Human, seconds, func);
-        protected void ReleaseCustomElbowBendDirArmL(double forSeconds = 0.5)
+        protected void ToInitial(double seconds, params BodyPart[] parts)
+        {
+            if (parts == null || parts.Length == 0) return;
+            var paths = new List<IExecutorOfProgress>();
+            for (int i = 0; i < parts.Length; i++)
+            {
+                var ioh = GetInitialOrientationHolder(parts[i]);
+                paths.Add(ioh.ToInitialLocalPosition());
+                paths.Add(ioh.ToInitialLocalRotation());
+            }
+            StartFuncAni(seconds, x => applyAll(smoothstep(x), paths));
+        }
+        IInitialOrientationHolder GetInitialOrientationHolder(BodyPart bp)
+        {
+            switch (bp)
+            {
+                case BodyPart.ArmL: return ArmL;
+                case BodyPart.ArmR: return ArmR;
+                case BodyPart.Pelvis: return Pelvis;
+                case BodyPart.LegL: return LegL;
+                case BodyPart.LegR: return LegR;
+                case BodyPart.Spine: return Spine;
+                case BodyPart.Head: return Head;
+                case BodyPart.EyeL: return EyeL;
+                case BodyPart.EyeR: return EyeR;
+                case BodyPart.Jaw: return Jaw;
+                case BodyPart.HandL: return HandL;
+                case BodyPart.HandR: return HandR;
+                case BodyPart.NeckLower: return NeckLower;
+                case BodyPart.Neck: return NeckUpper;
+                case BodyPart.ToesL: return ToesL;
+                case BodyPart.ToesR: return ToesR;
+//                case BodyPart.BreastL: return BreastL;
+//                case BodyPart.BreastR: return BreastR;
+                case BodyPart.FootL: return FootL;
+                case BodyPart.FootR: return FootR;
+                case BodyPart.Hip: return Hip;
+            }
+            return null;
+        }
+        /*protected void ReleaseCustomElbowBendDirArmL(double forSeconds = 0.5)
         {
             var last = ArmL.LastBenDir;
             if (ArmL.CustomBendDir == null) return;
@@ -68,20 +110,20 @@ namespace Unianio.Animations
                 ArmL.ElbowBendFactor = lerp(iniL, factor, x);
                 ArmR.ElbowBendFactor = lerp(iniR, factor, x);
             });
-        }
-        protected void SetNeckPathInModel(in Vector3 fw, in Vector3 up)
-        {
-            var midFw = slerp(in fw, in v3.fw, 0.5);
-            var midUp = slerp(in up, in v3.up, 0.5);
-
-            PathNeckLower.New.ModelRotToTarget(midFw, midUp).SetCondition(() => Human.AniFace.IsNotRunning());
-            PathNeckUpper.New.ModelRotToTarget(fw, up).SetCondition(() => Human.AniFace.IsNotRunning());
-        }
-        protected void SetNeckPathInLocal(double degreesDown = 0, double degreesRight = 0)
-        {
-            PathNeckLower.New.LocalRotToTarget(NeckLower.IniLocalFw.RotBk(degreesDown / 2.0).RotRt(degreesRight / 2), NeckLower.IniLocalUp).SetCondition(() => Human.AniFace.IsNotRunning());
-            PathNeckUpper.New.LocalRotToTarget(NeckUpper.IniLocalFw.RotDn(degreesDown).RotRt(degreesRight), NeckUpper.IniLocalUp).SetCondition(() => Human.AniFace.IsNotRunning());
-        }
+        }*/
+//        protected void SetNeckPathInModel(in Vector3 fw, in Vector3 up)
+//        {
+//            var midFw = slerp(in fw, in v3.fw, 0.5);
+//            var midUp = slerp(in up, in v3.up, 0.5);
+//
+//            PathNeckLower.New.ModelRotToTarget(midFw, midUp).SetCondition(() => Human.AniFace.IsNotRunning());
+//            PathNeckUpper.New.ModelRotToTarget(fw, up).SetCondition(() => Human.AniFace.IsNotRunning());
+//        }
+//        protected void SetNeckPathInLocal(double degreesDown = 0, double degreesRight = 0)
+//        {
+//            PathNeckLower.New.LocalRotToTarget(NeckLower.IniLocalFw.RotBk(degreesDown / 2.0).RotRt(degreesRight / 2), NeckLower.IniLocalUp).SetCondition(() => Human.AniFace.IsNotRunning());
+//            PathNeckUpper.New.LocalRotToTarget(NeckUpper.IniLocalFw.RotDn(degreesDown).RotRt(degreesRight), NeckUpper.IniLocalUp).SetCondition(() => Human.AniFace.IsNotRunning());
+//        }
         protected float FootY => Human.Initial.FootHeight;
         protected float ArmY => Human.Initial.RelaxedArmHeight;
         protected virtual Vector3 RelaxedModelPosArmL => v3.up.By(0.95) + v3.lt.By(0.22);
@@ -111,47 +153,43 @@ namespace Unianio.Animations
             var vecPivotOut = (Human.position - pivotPoint);
             Human.position += vecPivotIn + vecPivotOut;
         }
+        protected void HorzPivotEnds(Vector3 pivotPoint, Vector3 vecPivotIn)
+        {
+            var vecPivotOut = (Human.position - pivotPoint);
+            Human.position += (vecPivotIn.WithY(0) + vecPivotOut.WithY(0));
+        }
 
+        public Mover<HumBoneHandler> MoveHandL => Human.MoveHandL;
+        public Mover<HumBoneHandler> MoveHandR => Human.MoveHandR;
+        public Mover<IHumArmChain> MoveArmL => Human.MoveArmL;
+        public Mover<IHumArmChain> MoveArmR => Human.MoveArmR;
+        public Mover<HumLegChain> MoveLegL => Human.MoveLegL;
+        public Mover<HumLegChain> MoveLegR => Human.MoveLegR;
+        public Mover<HumBoneHandler> MoveFootL => Human.MoveFootL;
+        public Mover<HumBoneHandler> MoveFootR => Human.MoveFootR;
+        public Mover<HumBoneHandler> MoveToesL => Human.MoveToesL;
+        public Mover<HumBoneHandler> MoveToesR => Human.MoveToesR;
+        public Mover<HumBoneHandler> MovePelvis => Human.MovePelvis;
+        public Mover<HumBoneHandler> MoveHip => Human.MoveHip;
+        public Mover<HumBoneHandler> MoveHead => Human.MoveHead;
+        public Mover<HumBoneHandler> MoveNeckLower => Human.MoveNeckLower;
+        public Mover<HumBoneHandler> MoveNeckUpper => Human.MoveNeckUpper;
+        public Mover<HumSpineChain> MoveSpine => Human.MoveSpine;
+        public Mover<HumBoneHandler> MoveJaw => Human.MoveJaw;
+        public Mover<HumBoneHandler> MoveEyeL => Human.GenFace.MoveEyeL;
+        public Mover<HumBoneHandler> MoveEyeR => Human.GenFace.MoveEyeR;
 
-        public HandlePath PathCollarL => Human.PathCollarL;
-        public HandlePath PathCollarR => Human.PathCollarR;
-        public HandlePath PathHandL => Human.PathHandL;
-        public HandlePath PathHandR => Human.PathHandR;
-        public DirectionPath PathBendDirArmL => Human.PathBendDirArmL;
-        public DirectionPath PathBendDirArmR => Human.PathBendDirArmR;
-        public NumericPath PathElbowArmL => Human.PathElbowArmL;
-        public NumericPath PathElbowArmR => Human.PathElbowArmR;
-        public HandlePath PathArmL => Human.PathArmL;
-        public HandlePath PathArmR => Human.PathArmR;
-        public HandlePath PathLegL => Human.PathLegL;
-        public HandlePath PathLegR => Human.PathLegR;
-        public HandlePath PathFootL => Human.PathFootL;
-        public HandlePath PathFootR => Human.PathFootR;
-        public HandlePath PathToesL => Human.PathToesL;
-        public HandlePath PathToesR => Human.PathToesR;
-        public HandlePath PathPelvis => Human.PathPelvis;
-        public HandlePath PathHip => Human.PathHip;
-        public HandlePath PathHead => Human.PathHead;
-        public HandlePath PathNeckLower => Human.PathNeckLower;
-        public HandlePath PathNeckUpper => Human.PathNeckUpper;
-        public HandlePath PathSpine => Human.PathSpine;
-        public HandlePath PathJaw => Human.PathJaw;
-        public HandlePath PathEyeL => Human.GenFace.PathEyeL;
-        public HandlePath PathEyeR => Human.GenFace.PathEyeR;
-        public FacePath PathFace => Human.PathFace;
-        public HandlePath GetPath(HumLegChain leg) => leg.Side == BodySide.Left ? PathLegL : PathLegR;
-        public HandlePath GetPath(HumArmChain arm) => arm.Side == BodySide.Left ? PathArmL : PathArmR;
-        protected HandlePath OtherLegPath(HandlePath path) => path == PathLegL ? PathLegR : PathLegL;
-        protected HandlePath OtherArmPath(HandlePath path) => path == PathArmL ? PathArmR : PathArmL;
-        protected HumArmChain GetArm(HandlePath path) => path == PathArmL ? ArmL : ArmR;
-        protected HumLegChain GetLeg(HandlePath path) => path == PathLegL ? LegL : LegR;
+        protected Mover<HumLegChain> GetMove(HumLegChain leg) => leg.Side == BodySide.Left ? MoveLegL : MoveLegR;
+        protected Mover<IHumArmChain> GetMove(IHumArmChain arm) => arm.Side == BodySide.Left ? MoveArmL : MoveArmR;
+        protected Mover<HumLegChain> OtherLegMove(Mover<HumLegChain> Move) => Move == MoveLegL ? MoveLegR : MoveLegL;
+        protected Mover<IHumArmChain> OtherArmMove(Mover<IHumArmChain> Move) => Move == MoveArmL ? MoveArmR : MoveArmL;
         public HumLegChain OtherLeg(HumLegChain leg) => leg.Side == BodySide.Left ? LegR : LegL;
-        public HumArmChain OtherArm(HumArmChain arm) => arm.Side == BodySide.Left ? ArmR : ArmL;
-        public HumArmChain GetArm(BodySide side) => side == BodySide.Left ? ArmL : ArmR;
+        public IHumArmChain OtherArm(IHumArmChain arm) => arm.Side == BodySide.Left ? ArmR : ArmL;
+        public IHumArmChain GetArm(BodySide side) => side == BodySide.Left ? ArmL : ArmR;
         public HumLegChain GetLeg(BodySide side) => side == BodySide.Left ? LegL : LegR;
         public GenFaceGroup Face => Human.GenFace;
-        public HumArmChain ArmL => Human.ArmL;
-        public HumArmChain ArmR => Human.ArmR;
+        public IHumArmChain ArmL => Human.ArmL;
+        public IHumArmChain ArmR => Human.ArmR;
         public HumLegChain LegL => Human.LegL;
         public HumLegChain LegR => Human.LegR;
         public HumSpineChain Spine => Human.Spine;
@@ -171,7 +209,7 @@ namespace Unianio.Animations
         public HumBoneHandler HandR => Human.ArmR.HandHandler;
         public HumBoneHandler EyeL => Human.GenFace.EyeL;
         public HumBoneHandler EyeR => Human.GenFace.EyeR;
-        protected void SetPathElbowTarget(double target)
+        /*protected void SetPathElbowTarget(double target)
         {
             PathElbowArmL.New.ToTarget(target);
             PathElbowArmR.New.ToTarget(target);
@@ -180,7 +218,7 @@ namespace Unianio.Animations
         {
             PathElbowArmL.Apply(x);
             PathElbowArmR.Apply(x);
-        }
+        }*/
         protected virtual T SetHuman(IComplexHuman human)
         {
             Human = human;
@@ -198,34 +236,34 @@ namespace Unianio.Animations
             return (T)this.AsUniqueNamed(unique.RootObserverAni + human.ID);
         }
         protected void SetLegs(bool isRightOn,
-            out HandlePath onLegPath, out HandlePath offLegPath)
+            out Mover<HumLegChain> onLegMove, out Mover<HumLegChain> offLegMove)
         {
-            onLegPath = isRightOn ? PathLegR : PathLegL;
-            offLegPath = isRightOn ? PathLegL : PathLegR;
+            onLegMove = isRightOn ? MoveLegR : MoveLegL;
+            offLegMove = isRightOn ? MoveLegL : MoveLegR;
         }
         protected void SetLegs(bool isRightOn,
             out HumLegChain onLeg, out HumLegChain offLeg,
-            out HandlePath onLegPath, out HandlePath offLegPath)
+            out Mover<HumLegChain> onLegMove, out Mover<HumLegChain> offLegMove)
         {
             onLeg = isRightOn ? Human.LegR : Human.LegL;
             offLeg = isRightOn ? Human.LegL : Human.LegR;
-            onLegPath = isRightOn ? PathLegR : PathLegL;
-            offLegPath = isRightOn ? PathLegL : PathLegR;
+            onLegMove = isRightOn ? MoveLegR : MoveLegL;
+            offLegMove = isRightOn ? MoveLegL : MoveLegR;
         }
         protected void SetArms(bool isRightOn,
-            out HandlePath onArmPath, out HandlePath offArmPath)
+            out Mover<IHumArmChain> onArmMove, out Mover<IHumArmChain> offArmMove)
         {
-            onArmPath = isRightOn ? PathArmR : PathArmL;
-            offArmPath = isRightOn ? PathArmL : PathArmR;
+            onArmMove = isRightOn ? MoveArmR : MoveArmL;
+            offArmMove = isRightOn ? MoveArmL : MoveArmR;
         }
         protected void SetArms(bool isRightOn,
-            out HumArmChain onArm, out HumArmChain offArm,
-            out HandlePath onArmPath, out HandlePath offArmPath)
+            out IHumArmChain onArm, out IHumArmChain offArm,
+            out Mover<IHumArmChain> onArmMove, out Mover<IHumArmChain> offArmMove)
         {
             onArm = isRightOn ? Human.ArmR : Human.ArmL;
             offArm = isRightOn ? Human.ArmL : Human.ArmR;
-            onArmPath = isRightOn ? PathArmR : PathArmL;
-            offArmPath = isRightOn ? PathArmL : PathArmR;
+            onArmMove = isRightOn ? MoveArmR : MoveArmL;
+            offArmMove = isRightOn ? MoveArmL : MoveArmR;
         }
         public override string ToString()
         {
