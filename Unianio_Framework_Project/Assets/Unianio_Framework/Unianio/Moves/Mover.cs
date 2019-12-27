@@ -282,6 +282,24 @@ namespace Unianio.Moves
             _move = move;
             return this;
         }
+        public Mover<T> WrapRot(Func<float, Quaternion, Quaternion> func)
+        {
+            if (_rotate == null) throw new ArgumentException("Nothing to wrap, no need to call WrapRot");
+            _rotate = new DynamicWrappedRotationMove(func, _rotate);
+            return this;
+        }
+        public Mover<T> WrapPos(Func<float, Vector3, Vector3> func)
+        {
+            if(_move == null) throw new ArgumentException("Nothing to wrap, no need to call WrapPos");
+            _move = new DynamicWrappedPositionMove(func, _move);
+            return this;
+        }
+        public Mover<T> WrapSca(Func<float, Vector3, Vector3> func)
+        {
+            if (_scale == null) throw new ArgumentException("Nothing to wrap, no need to call WrapSca");
+            _scale = new DynamicWrappedPositionMove(func, _scale);
+            return this;
+        }
         public int Tag { get; set; }
         public void Apply(double progress, Func<double, double> function = null)
         {
