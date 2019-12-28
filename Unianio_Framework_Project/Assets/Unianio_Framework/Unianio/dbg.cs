@@ -382,7 +382,9 @@ namespace Unianio
         }
         public static void unpause()
         {
+#if UNITY_EDITOR
             UnityEditor.EditorApplication.isPaused = false;
+#endif
         }
         public static bool isXact;
         public static readonly bool[] blns = new bool[16];

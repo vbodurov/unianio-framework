@@ -162,6 +162,19 @@ namespace Unianio.Moves
         }
 
 
+        public Mover<T> CurveRelToEnd(Vector3 target, Vector3 control, double relLength, Func<double, double> func = null)
+            => CurveRelToEnd(m => target, m => control, relLength, func);
+        public Mover<T> CurveRelToEnd(Func<T, Vector3> getTarget, Func<T, Vector3> getControl, double relLength, Func<double, double> func = null)
+        {
+            var pos = _obj.GetPosBySpace(_currentSpace);
+            return SetPos(move.Curve(
+                m => _posMergeFunc != null ? lerp(in pos, in _startPos, _posMergeFunc(m.X)) : pos,
+                m => m.To + getControl(_obj) * (distance.Between(m.From, m.To) * (float)relLength),
+                m => getTarget(_obj),
+                func
+            ));
+        }
+
         public Mover<T> CurveRelToMid(Vector3 target, Vector3 control1, Vector3 control2, Func<double, double> func = null)
             => CurveRelToMid(m => target, m => control1, m => control2, func);
         public Mover<T> CurveRelToMid(Func<T, Vector3> getTarget, Func<T, Vector3> getControl1, Func<T, Vector3> getControl2, Func<double, double> func = null)
@@ -229,6 +242,51 @@ namespace Unianio.Moves
                 move.Composite(
                     move.InRange(0.0, start2, part1),
                     move.InRange(start2, 1.0, part2)));
+        }
+
+
+
+        public Mover<T> RotateTo3(
+            Quaternion target1, double start2, 
+            Quaternion target2, double start3, 
+            Quaternion target3,  
+            Func<double, double> func1 = null, Func<double, double> func2 = null, Func<double, double> func3 = null)
+            => RotateTo3(m => target1, start2, m => target2, start3, m => target3, func1, func2, func3);
+        public Mover<T> RotateTo3(
+            Vector3 fw1, Vector3 up1, 
+            double start2, 
+            Vector3 fw2, Vector3 up2,
+            double start3,
+            Vector3 fw3, Vector3 up3,
+            Func<double, double> func1 = null, Func<double, double> func2 = null, Func<double, double> func3 = null)
+            => RotateTo3(m => lookAt(in fw1, in up1), start2, m => lookAt(in fw2, in up2), start3, m => lookAt(in fw3, in up3), func1, func2, func3);
+        public Mover<T> RotateTo3(
+            Func<T, Quaternion> getTarget1, double start2, 
+            Func<T, Quaternion> getTarget2, double start3, 
+            Func<T, Quaternion> getTarget3, 
+            Func<double, double> func1 = null, Func<double, double> func2 = null, Func<double, double> func3 = null)
+        {
+            var rot = _obj.GetRotBySpace(_currentSpace);
+            var part1 = move.Rotate(
+                m => _rotMergeFunc != null ? slerp(in rot, in _startRot, _rotMergeFunc(m.X)) : rot,
+                m => getTarget1(_obj),
+                func1
+            );
+            var part2 = move.Rotate(
+                m => getTarget1(_obj),
+                m => getTarget2(_obj),
+                func2
+            );
+            var part3 = move.Rotate(
+                m => getTarget2(_obj),
+                m => getTarget3(_obj),
+                func3
+            );
+            return SetRot(
+                move.Composite(
+                    move.InRange(0.0,    start2,   part1),
+                    move.InRange(start2, start3,   part2),
+                    move.InRange(start3,    1.0,   part3)));
         }
 
         /// <summary>

@@ -24,9 +24,11 @@ namespace UnianioDemos.Demo01
 
             MoveHip.Local
                 .LineTo2(
-                    hip => hip.IniLocalPos.By(0.99),
-                    0.4,
-                    hip => hip.IniLocalPos.By(0.94)
+                    hip => hip.IniLocalPos,
+                    0.5,
+                    hip => hip.IniLocalPos.By(0.94),
+                    x => smootherstep(x),
+                    x => smootherstep(x)
                 );
 
             MoveSpine.Local
@@ -34,16 +36,17 @@ namespace UnianioDemos.Demo01
                 ;
 
             stepLegMove.Model
-                .CurveRelToMid(
-                    stepSide.By(0.07).AddFw(0.3).WithY(FootY), v3.up, 0.5)
-                .RotateTo2(v3.fw.RotDn(25), v3.up, 0.5, v3.fw, v3.up)
-                ;              ;
+                .CurveRelToEnd(
+                    stepSide.By(0.07).AddFw(0.32).WithY(FootY), v3.up, 0.5, x => smoothstep(x))
+                .RotateTo2(v3.fw.RotDn(25), v3.up, 0.5, v3.fw.RotUp(25), v3.up)
+                ; 
             pushLegMove.Model
                 .LineTo(
                     pushSide.By(0.07).AddBk(0.30).WithY(FootY))
                     .WrapPos((x, v) => new Vector3(v.x, v.y + 0.08f * sharpstep(0.80, 1.00, x), v.z))
                 .RotateTo2(
-                    v3.fw, v3.up, 0.80, v3.fw.RotDn(30), v3.up)
+                    v3.fw, v3.up, 0.80, v3.fw.RotDn(30), v3.up, x => (x * 10).Clamp01()
+                    , null)
                 ;
 
             stepArmMove.Local.CurveRelToMid(
@@ -62,7 +65,7 @@ namespace UnianioDemos.Demo01
                         apply(x, stepLegMove, pushLegMove, stepArmMove, pushArmMove, MoveSpine, MoveHip);
                         update(stepLeg, pushLeg);
                         if (_step.IsDivisibleBy(6))
-                            Human.rotation = iniRot * Quaternion.AngleAxis(-120 * smoothstep(x), v3.up);
+                            Human.rotation = iniRot * Quaternion.AngleAxis(-120 * smootherstep(x), v3.up);
                     }
                     HorzPivotEnds(pushLeg.Toe.position, vecPivot);
                 })
