@@ -13,7 +13,7 @@ In addition to that, the framework provides:
  * Messaging
  * Inversion of Control
  * Scheduling
- * 3D Geometry and Math utilities
+ * 3D Geometry and Math Utilities
 
 Download Unity package: 
 https://github.com/vbodurov/unianio-framework/raw/develop/unity-packages/Unianio%20Framework%20v0.9.0.unitypackage
