@@ -1,7 +1,7 @@
 # Unianio Framework
 
-**UNI**-ty 
-**ANI**-mation 
+**UNI**-ty
+**ANI**-mation
 **O**-rganizer
 
 Unianio is unity framework for **procedural 3D humanoid character animations**
