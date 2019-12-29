@@ -16,6 +16,6 @@ In addition to that, the framework provides:
  * 3D Geometry and Math utilities
 
 Download Unity package: 
-http://www.unianio.com/files/Unianio%20Framework%20v0.9.0.unitypackage
+https://github.com/vbodurov/unianio-framework/raw/develop/unity-packages/Unianio%20Framework%20v0.9.0.unitypackage
 
 
