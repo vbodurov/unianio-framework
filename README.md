@@ -39,7 +39,9 @@ You can create them as you like, there are only 2 requirements in Make Human:
 
 2. When you export the model (File - Export) choose **meter as unit scale**
 
-3. Inside Unity after you add the model to the scene click on it and add **Unianio Make Human Model** from the inspector
+Then inside Unity
 
-4. You may want to change Persona ID giving a model name if you will have multiple models
+1. After you add the model to the scene click on it and add **Unianio Make Human Model** from the inspector
+
+2. You may want to change Persona ID giving a model name if you will have multiple models
 
