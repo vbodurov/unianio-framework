@@ -7,6 +7,14 @@ using static Unianio.Static.fun;
 
 public class UnianioDemo_01 : MonoBehaviour
 {
+    void Start()
+    {
+        subscribe<HumanRegistered>(OnHumanRegistered, this);
+    }
+    void OnHumanRegistered(HumanRegistered e)
+    {
+        // use this event to access human for the first time
+    }
     public void Stand()
     {
         var human = get<IHumanManager>().GetHumanByPersona(humanNamed.John);
