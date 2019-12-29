@@ -37,9 +37,9 @@ You can create them as you like, there are only 2 requirements in Make Human:
 
 1. In Pose/Animate you have to choose **Default no toes**
 
-2. When you export the model (File - Export) choose **meter as unit scale**
+2. When you export the model (File - Export) choose **meter** as unit scale
 
-Then inside Unity
+Then inside Unity:
 
 1. After you add the model to the scene click on it and add **Unianio Make Human Model** from the inspector
 
