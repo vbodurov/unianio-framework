@@ -45,3 +45,8 @@ Then inside Unity:
 
 2. You may want to change Persona ID giving a model name if you will have multiple models
 
+## Video Tutorials
+
+1. How to Install? How to Import Models? https://www.youtube.com/watch?v=jaiti5znj1E
+
+2. Simple Walk Animation https://www.youtube.com/watch?v=x0OpaI_GaKk
