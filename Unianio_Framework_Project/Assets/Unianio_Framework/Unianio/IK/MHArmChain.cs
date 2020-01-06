@@ -13,9 +13,10 @@ namespace Unianio.IK
 {
     public class MHArmChain : BaseIkChain, IHumArmChain
     {
-        readonly IComplexHumanDefinition _definition;
         readonly float _distHandToElbow, _distElbowToShoulder, _iniDegToRelPoint;
         readonly Quaternion _iniCollarLocRot, _maxCollarLocRot;
+        float _shake01;
+        IShakeableArm _shakeable;
 
         public HumBoneHandler HandHandler { get; }
         public bool AutoPositionHand { get; set; }
@@ -90,13 +91,32 @@ namespace Unianio.IK
             get => _handle.position;
             set => _handle.position = value;
         }
+        public bool Shakeable
+        {
+            get => _shakeable != null;
+            set
+            {
+                if (!value && _shakeable != null)
+                {
+                    _shakeable = null;
+                }
+                else if (value && _shakeable == null)
+                {
+                    _shakeable = get<IShakeableArm>().Set(this);
+                }
+            }
+        }
+        public float Shake01
+        {
+            get => _shake01;
+            set => _shake01 = value.Clamp01();
+        }
         public float MaxStretch { get; }
         public MHArmChain(BodyPart part, IComplexHumanDefinition definition) : base(part)
         {
             Side = part == BodyPart.ArmR ? BodySide.RT : BodySide.LT;
             SideDir = Side.IsRight() ? v3.rt : v3.lt;
-            _definition = definition;
-            _model = _definition.Model;
+            _model = definition.Model;
             var arm = Side.IsRight() ? definition.ArmR : definition.ArmL;
 
             ArmRoot = arm.ArmRoot;
@@ -194,7 +214,10 @@ namespace Unianio.IK
             ForearmTwist.rotation = Quaternion.LookRotation(lowerArmFw, forearmTwistUp);
             if (AutoPositionHand)
             {
-                Hand.rotation = _handle.rotation;
+                Hand.rotation = 
+                    _shakeable != null 
+                        ? slerp(_handle.rotation, _shakeable.Shakeable.rotation, _shake01) 
+                        : _handle.rotation;
             }
         }
         //     [Forearm] (elbow)
