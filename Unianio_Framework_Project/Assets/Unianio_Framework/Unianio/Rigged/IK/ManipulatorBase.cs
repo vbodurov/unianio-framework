@@ -24,19 +24,19 @@ namespace Unianio.Rigged.IK
         Vector3 LocalScale { get; }
         Quaternion RotationInLocalSpace { get; }
 
-        bool TrySetWorldPos(Vector3 worldPos);
-        bool TrySetModelPos(Vector3 modelPos);
-        bool TrySetLocalPos(Vector3 localPos);
-        bool TrySetWorldRot(Vector3 worldForward, Vector3 worldUp);
-        bool TrySetModelRot(Vector3 modelForward, Vector3 modelUp);
-        bool TrySetLocalRot(Quaternion localRotation);
+        bool TrySetWorldPos(in Vector3 worldPos);
+        bool TrySetModelPos(in Vector3 modelPos);
+        bool TrySetLocalPos(in Vector3 localPos);
+        bool TrySetWorldRot(in Vector3 worldForward, in Vector3 worldUp);
+        bool TrySetModelRot(in Vector3 modelForward, in Vector3 modelUp);
+        bool TrySetLocalRot(in Quaternion localRotation);
         bool TryMarkCurrentPos();
         bool TryMarkCurrentRot();
-        bool TrySetModelRot(Quaternion quaternion);
-        bool TrySetWorldRot(Quaternion quaternion);
+        bool TrySetModelRot(in Quaternion quaternion);
+        bool TrySetWorldRot(in Quaternion quaternion);
         IManipulator3D ClearPosMask();
         IManipulator3D ClearRotMask();
-        bool TrySetLocalScale(Vector3 getValueByProgress);
+        bool TrySetLocalScale(in Vector3 getValueByProgress);
         IManipulator3D ClearScaMask();
         bool TryMarkCurrentScale();
 
@@ -64,21 +64,21 @@ namespace Unianio.Rigged.IK
         public virtual Quaternion RotationInModelSpace => lookAt(ModelFw, ModelUp);
         public virtual Quaternion RotationInLocalSpace => Control.localRotation;
 
-        bool IManipulator3D.TrySetWorldPos(Vector3 worldPos)
+        bool IManipulator3D.TrySetWorldPos(in Vector3 worldPos)
         {
             if (HasAppliedPosition) return false;
             Control.position = worldPos;
             _hasPosition = true;
             return true;
         }
-        bool IManipulator3D.TrySetModelPos(Vector3 modelPos)
+        bool IManipulator3D.TrySetModelPos(in Vector3 modelPos)
         {
             if (HasAppliedPosition) return false;
             Control.position = Model.TransformPoint(modelPos);
             _hasPosition = true;
             return true;
         }
-        bool IManipulator3D.TrySetLocalPos(Vector3 localPos)
+        bool IManipulator3D.TrySetLocalPos(in Vector3 localPos)
         {
             if (HasAppliedPosition) return false;
             Control.localPosition = localPos;
@@ -86,14 +86,14 @@ namespace Unianio.Rigged.IK
             return true;
         }
 
-        bool IManipulator3D.TrySetWorldRot(Vector3 worldForward, Vector3 worldUp)
+        bool IManipulator3D.TrySetWorldRot(in Vector3 worldForward, in Vector3 worldUp)
         {
             if (HasAppliedRotation) return false;
             Control.LookAt(Control.position + worldForward, worldUp);
             _hasRotation = true;
             return true;
         }
-        bool IManipulator3D.TrySetWorldRot(Quaternion quaternion)
+        bool IManipulator3D.TrySetWorldRot(in Quaternion quaternion)
         {
             if (HasAppliedRotation) return false;
             Control.rotation = quaternion;
@@ -101,7 +101,7 @@ namespace Unianio.Rigged.IK
             return true;
         }
 
-        bool IManipulator3D.TrySetModelRot(Vector3 modelForward, Vector3 modelUp)
+        bool IManipulator3D.TrySetModelRot(in Vector3 modelForward, in Vector3 modelUp)
         {
             if (HasAppliedRotation) return false;
             var worldForward = Model.TransformDirection(modelForward);
@@ -110,7 +110,7 @@ namespace Unianio.Rigged.IK
             _hasRotation = true;
             return true;
         }
-        bool IManipulator3D.TrySetModelRot(Quaternion quaternion)
+        bool IManipulator3D.TrySetModelRot(in Quaternion quaternion)
         {
             if (HasAppliedRotation) return false;
             var fwWorld = Model.TransformDirection(quaternion*Vector3.forward);
@@ -120,7 +120,7 @@ namespace Unianio.Rigged.IK
             return true;
         }
 
-        bool IManipulator3D.TrySetLocalRot(Quaternion localRotation)
+        bool IManipulator3D.TrySetLocalRot(in Quaternion localRotation)
         {
             if (HasAppliedRotation) return false;
             Control.localRotation = localRotation;
@@ -160,7 +160,7 @@ namespace Unianio.Rigged.IK
             _hasScale = false;
             return this;
         }
-        bool IManipulator3D.TrySetLocalScale(Vector3 localScale)
+        bool IManipulator3D.TrySetLocalScale(in Vector3 localScale)
         {
             if (HasAppliedScale) return false;
             Control.localScale = localScale;

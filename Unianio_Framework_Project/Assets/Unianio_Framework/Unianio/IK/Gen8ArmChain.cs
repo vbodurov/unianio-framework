@@ -123,6 +123,16 @@ namespace Unianio.IK
         {
             throw new NotImplementedException();
         }
+        public bool Shakeable
+        {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
+        }
+        public float Shake01
+        {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
+        }
         public Gen8ArmChain(BodyPart part, IComplexHumanDefinition definition) : base(part)
         {
             _isRight = part == BodyPart.ArmR;

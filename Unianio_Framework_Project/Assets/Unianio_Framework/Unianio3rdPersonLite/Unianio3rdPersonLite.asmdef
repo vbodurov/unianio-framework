@@ -1,6 +1,8 @@
 {
-    "name": "UnianioConfiguration",
-    "references": [],
+    "name": "Unianio3rdPersonLite",
+    "references": [
+        "GUID:b7dcd3c24bd94df47822be8731cc4eb2"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
@@ -8,12 +10,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [
-        {
-            "name": "Select...",
-            "expression": "",
-            "define": "0.9.1"
-        }
-    ],
+    "versionDefines": [],
     "noEngineReferences": false
 }

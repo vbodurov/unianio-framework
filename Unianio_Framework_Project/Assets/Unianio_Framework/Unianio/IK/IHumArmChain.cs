@@ -40,6 +40,8 @@ namespace Unianio.IK
         Vector3 SideDir { get; }
         float MaxStretch { get; }
         void CalculateArmBend(out Vector3 midPoint, out float lengthToElbow);
+        bool Shakeable { get; set; }
+        float Shake01 { get; set; }
     }
 
 }

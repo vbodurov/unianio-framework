@@ -21,7 +21,7 @@ namespace Unianio.Extensions
                 var elbowPos = midPos + backDir * length;
                 var target = lookAt(elbowPos.DirTo(in handlePos), in worldUp);
                 return slerp(in iniRot, in target, 1 - pow(1 - x, 8));
-            }));
+            }));  
         }
     }
 }

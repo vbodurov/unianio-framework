@@ -50,10 +50,10 @@ namespace UnianioDemos.Demo01
                 ;
 
             stepArmMove.Local.CurveRelToMid(
-                stepArm.IniLocalPos.RotDn(30).RotBk(37).By(0.95), v3.dn, 0.2)
+                stepArm.IniLocalPos.RotDn(30).RotBk(37).By(0.955), v3.dn, 0.2)
                 .NaturalHandRotation();
             pushArmMove.Local.CurveRelToMid(
-                pushArm.IniLocalPos.RotDn(30).RotFw(10).By(0.92), v3.dn, 0.2)
+                pushArm.IniLocalPos.RotDn(30).RotFw(10).By(0.93), v3.dn, 0.2)
                 .NaturalHandRotation();
 
             hands<HumHandRelaxedAni>(Human);
