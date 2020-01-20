@@ -148,15 +148,15 @@ namespace Unianio.Events
         public ulong Id { get; }
         public DeselectUiElement(ulong id) => Id = id;
     }
-    
-    
+
+
     public abstract class ComplexHumanInstanceEvent : NamedEvent
     {
         protected ComplexHumanInstanceEvent(IComplexHuman human) : base(human.ID) { Human = human; }
         public IComplexHuman Human { get; }
     }
-    
-    public class CancelInertia : ComplexHumanInstanceEvent { public CancelInertia(IComplexHuman human) : base(human){} }
+
+    public class CancelInertia : ComplexHumanInstanceEvent { public CancelInertia(IComplexHuman human) : base(human) { } }
     public class RootAnimationChanged : ComplexHumanInstanceEvent
     {
         public IAnimation Previous { get; }
@@ -195,7 +195,7 @@ namespace Unianio.Events
         public BodySide Side { get; }
         public BodyPart Part { get; }
         public SoftBodyConfig Config { get; }
-        public RegisterSoftBodyConfig(IComplexHuman human, BodySide side, BodyPart part, SoftBodyConfig config) 
+        public RegisterSoftBodyConfig(IComplexHuman human, BodySide side, BodyPart part, SoftBodyConfig config)
             : base(human)
         {
             Side = side;
@@ -235,7 +235,7 @@ namespace Unianio.Events
         {
             IsInTransition = isInTransition;
         }
-        public bool IsInTransition { get; private set; }   
+        public bool IsInTransition { get; private set; }
     }
 
     public abstract class GameButtonPress : BaseEvent
@@ -320,7 +320,7 @@ namespace Unianio.Events
         public readonly ControllerSide Side;
         public readonly bool IsDisabled;
     }
-    
+
     public class ChangeControllersVisibility : BaseEvent
     {
         public readonly bool Visible;
